@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}
+Candidate Page
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1> Candidates....</h1>
+
+        <form method="POST" style="color:white"  autocomplete="off">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <div class="row g-3 ">
+                <div class="col-2 ">
+                    {{ form.choices_classgrp.label() }}
+                </div>
+            </div>
+
+           <div class="row g-3 ">
+                <div class="col-2 ">
+                    <select class="form-select form-select-sm mb-3" aria-label="Large select example" name="choices_classgrp"
+                            hx-get="/candidate/search"
+                            hx-target="#candidate_search"
+                            hx-trigger="change">
+                    <option selected>Please select</option>
+                    {% for p in form.choices_classgrp.choices %}
+                        <option value="{{ p[0] }}">{{ p[1] }}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+           </div>
+
+           <br>
+            <div class="row g-3 ">
+                <div class="col-2 ">
+                    {{ form.choices_office.label() }}
+                </div>
+            </div>
+            <div class="row g-3 ">
+                 <div class="col-2 ">
+                     <select class="form-select form-select-sm mb-3" aria-label="Large select example" name="choices_office">
+                              <option selected>Please select</option>
+                              {% for p in form.choices_office.choices %}
+                                  <option value="{{ p[0] }}">{{ p[1] }}</option>
+                              {% endfor %}
+                     </select>
+                </div>
+
+            </div>
+
+            <div class="row g-3 ">
+                <div class="col-2 ">
+                     {{ form.firstname.label() }}
+                </div>
+            </div>
+             <div class="row g-3 ">
+                 <div class="col-auto">
+                     {{ form.firstname()}}
+                </div>
+            </div>
+
+            <div class="row g-3 ">
+                 {{ form.lastname.label() }}
+            </div>
+
+             <div class="row g-3 ">
+                 <div class="col-auto">
+                     {{ form.lastname()}}
+                </div>
+            </div>
+            <br>
+            <div class="d-grid gap-2 d-md-block">
+                {{ form.submit(type="submit",value='Add Candidate', class="btn   btn-primary") }}
+            </div>
+        </form>
+    <br><br>
+            <div class="container" id="candidate_search">
+
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base1.html' %}
+{% block title %}
+Ballot 1
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1> Ballot ....</h1>
+        <br>
+
+        <form method="post" style="color:white" autocomplete="off">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+
+             <div class="row g-3 ">
+                <div class="col-2 ">
+                    <p class="text-warning">{{ grp }} - {{ office }}
+                    <br>
+                        Vote for 1</p>
+                </div>
+            </div>
+            <div class="form-check">
+            {% for candidate_id, candidate_name in candidates %}
+                  <input class="form-check-input" required type="radio" name="candidate" id="{{ candidate_id }}" value="{{ candidate_id|string + "$" + candidate_name }}">
+                  <label class="form-check-label" for="{{ candidate_id }}">
+                      {{ candidate_name }}
+                  </label>
+             <br>
+            {% endfor %}
+                    <br>
+
+                  <input class="form-check-input" required type="radio" name="candidate" id="{{ "99" }}" value="{{ "99$NoVote" }}">
+                  <label class="form-check-label" for="{{ "99" }}">
+                     No Vote {{  office }}
+                  </label>
+
+            <br>
+
+            {% if html_writein != 0 %}
+                <br>
+                <input class="form-check-input" required type="radio" name="candidate" id="writein" value="{{ html_writein|string  + "$" + "Write In" }}">
+                  <label class="form-check-label" for="writein">
+                     Write In {{ office }}
+                  </label>
+                <div id="writeinField" style="display:none;">
+                    <label for="writeinName">Enter Write-In Name:</label>
+                    <input type="text" id="writeinName" name="writein_name" required>
+                </div>
+            {% endif %}
+
+              </div>
+            <br>
+            <input type="hidden" name="grp" value={{  grp }}>
+            <input type="hidden" name="office" value={{  office }}>
+            <input type="hidden" name="form_name" value="VoteForOne">
+            <input type="submit" value="Next -->" class="btn btn-primary">
+        </form>
+    </div>
+
+       <script>
+        document.getElementById('writein').addEventListener('change', function() {
+            document.getElementById('writeinField').style.display = 'block';
+        });
+
+        document.querySelectorAll('input[name="candidate"]').forEach(function(elem) {
+            elem.addEventListener('change', function() {
+                if (this.id !== 'writein') {
+                    document.getElementById('writeinField').style.display = 'none';
+                    document.getElementById('writeinName').removeAttribute('required');
+                } else {
+                    document.getElementById('writeinName').setAttribute('required', 'required');
+                }
+            });
+        });
+
+        document.getElementById('ballotForm').addEventListener('submit', function(event) {
+            if (document.getElementById('writein').checked) {
+                const writeinName = document.getElementById('writeinName').value;
+                if (!writeinName) {
+                    event.preventDefault();
+                    alert('Please enter a name for the write-in candidate.');
+                }
+            }
+        });
+    </script>
+{% endblock %}

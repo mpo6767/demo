@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}
+Candidate Page
+{% endblock %}
+
+{% block content %}
+     <div class="container mt-5" style="background-color: white; color: black;">
+        <h1 class="mb-4">Vote Results</h1>
+         <form method="POST" style="color:white"  autocomplete="off">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+             <div class="row g-3 ">
+                <div class="col-2 ">
+                    <select class="form-select form-select-sm mb-3" aria-label="Large select example" name="choices_classgrp"
+                            hx-get="/vote_results/search"
+                            hx-target="#vote_results_x"
+                            hx-trigger="change">
+                    <option selected>Please select</option>
+                    {% for p in form.choices_classgrp.choices %}
+                        <option value="{{ p[1] }}">{{ p[1] }}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+             </div>
+         </form>
+             <div class="container" id="vote_results_x">
+
+            </div>
+    </div>
+
+{% endblock %}
