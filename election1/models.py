@@ -4,6 +4,16 @@ from datetime import datetime
 from election1.utils import unique_security_token
 from sqlalchemy import func
 
+class BallotType(db.Model):
+    """
+    Represents the type of ballot used in the election.
+    """
+    id_ballot_type = db.Column(db.Integer, primary_key=True)
+    ballot_type_name = db.Column(db.String(length=45), nullable=False, unique=True)
+    creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    offices = db.relationship('Office', backref='ballot_type', cascade="all, delete-orphan")
+
+
 
 class Classgrp(db.Model):
     """
@@ -20,6 +30,16 @@ class Classgrp(db.Model):
     def classgrp_query(cls):
         return [(c.id_classgrp, c.name) for c in cls.query.order_by(cls.sortkey).all()]
 
+class BallotMeasure(db.Model):
+    """
+    Represents a ballot measure in the election.
+    """
+    id_ballot_measure = db.Column(db.Integer, primary_key=True)
+    ballot_measure_title = db.Column(db.String(length=45), nullable=False, unique=True)
+    ballot_measure_description = db.Column(db.String(length=255), nullable=False)
+    creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    offices = db.relationship('Office', backref='ballot_measure', cascade="all, delete-orphan")
+
 
 class Office(db.Model):
     """
@@ -30,6 +50,8 @@ class Office(db.Model):
     office_vote_for = db.Column(db.Integer, default=1, nullable=False)
     sortkey = db.Column(db.Integer, nullable=False, unique=True)
     creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    id_ballot_type = db.Column(db.Integer, db.ForeignKey('ballot_type.id_ballot_type'), nullable=False)
+    id_ballot_measure = db.Column(db.Integer, db.ForeignKey('ballot_measure.id_ballot_measure'), nullable=True)
     candidates = db.relationship('Candidate', cascade="all, delete-orphan", backref='office')
 
     @classmethod
