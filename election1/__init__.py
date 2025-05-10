@@ -4,8 +4,8 @@ import logging.config
 from flask import Flask, session
 from .models import User
 from werkzeug.security import generate_password_hash
-from sqlalchemy_utils import database_exists
-from sqlalchemy import exc
+from sqlalchemy_utils import database_exists, create_database
+from sqlalchemy import exc, create_engine
 
 logging.config.fileConfig('logging.conf')
 
@@ -67,58 +67,104 @@ def config_extention(app):
     login_manager.init_app(app)
     config_manager(login_manager)
 
-    if not os.path.exists("instance/election.db"):
-        logger.info("database is  not here will be created")
-
-        db_name = "election.db"
+    # Automatically create the MySQL database if it doesn't exist
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    if not database_exists(engine.url):
+        create_database(engine.url)
+        logger.info("Database created successfully.")
         with app.app_context():
-            # if database_exists('sqlite:///instance/' + db_name):
-            if database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
-                logger.info(db_name + " already exists")
+            try:
+                db.create_all()
+                logger.info("Tables created successfully.")
+                id_admin_role = 1
+                admin_role_name = "Super Admin"
+                new_admin_role = models.Admin_roles(id_admin_role=id_admin_role,
+                                                    admin_role_name=admin_role_name)
+                db.session.add(new_admin_role)
 
-            else:
-                logger.info(db_name + " does not exist, will create " + db_name)
-                try:
-                    db.create_all()
-                    id_admin_role = 1
-                    admin_role_name = "Super Admin"
-                    new_admin_role = models.Admin_roles(id_admin_role=id_admin_role,
-                                                        admin_role_name=admin_role_name)
-                    db.session.add(new_admin_role)
+                id_admin_role = 2
+                admin_role_name = "Election Admin"
+                new_admin_role = models.Admin_roles(id_admin_role=id_admin_role,
+                                                    admin_role_name=admin_role_name)
+                db.session.add(new_admin_role)
 
-                    id_admin_role = 2
-                    admin_role_name = "Election Admin"
-                    new_admin_role = models.Admin_roles(id_admin_role=id_admin_role,
-                                                        admin_role_name=admin_role_name)
-                    db.session.add(new_admin_role)
+                user_firstname = "admin"
+                user_lastname = "admin"
+                user_so_name = "admin"
+                user_pass = "adminpassword"
+                id_admin_role = 1
+                user_email = "no@email.com"
+                user_status = 1
+                user_pw_change = 'N'
+                new_user = User(user_firstname=user_firstname,
+                                user_lastname=user_lastname,
+                                user_so_name=user_so_name,
+                                user_pass=generate_password_hash(user_pass, method='scrypt', salt_length=16),
+                                id_admin_role=id_admin_role,
+                                user_email=user_email,
+                                user_status=user_status,
+                                user_pw_change=user_pw_change)
 
-                    user_firstname = "admin"
-                    user_lastname = "admin"
-                    user_so_name = "admin"
-                    user_pass = "adminpassword"
-                    id_admin_role = 1
-                    user_email = "no@email.com"
-                    user_status = 1
-                    user_pw_change = 'N'
-                    new_user = User(user_firstname=user_firstname,
-                                    user_lastname=user_lastname,
-                                    user_so_name=user_so_name,
-                                    user_pass=generate_password_hash(user_pass, method='scrypt', salt_length=16),
-                                    id_admin_role=id_admin_role,
-                                    user_email=user_email,
-                                    user_status=user_status,
-                                    user_pw_change=user_pw_change)
+                db.session.add(new_user)
+                db.session.commit()
 
-                    db.session.add(new_user)
-                    db.session.commit()
+            except Exception as e:
+                logger.error(f"Error creating tables: {e}")
+    else:
+        logger.info("Database already exists.")
 
-                except exc.SQLAlchemyError as sqlalchemyerror:
-                    db.session.rollback()
-                    logger.info("got the following SQLAlchemyError: " + str(sqlalchemyerror))
-                except Exception as exception:
-                    logger.info("got the following Exception: " + str(exception))
-                finally:
-                    logger.info("db.create_all() in __init__.py was successfull - no exceptions were raised")
+    # if not os.path.exists("instance/election.db"):
+    #     logger.info("database is  not here will be created")
+
+    # db_name = "election.db"
+    # with app.app_context():
+    #     # if database_exists('sqlite:///instance/' + db_name):
+    #     if database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
+    #         logger.info(db_name + " already exists")
+    #
+    #     else:
+    #         logger.info(db_name + " does not exist, will create " + db_name)
+    #         try:
+    #             db.create_all()
+    #             id_admin_role = 1
+    #             admin_role_name = "Super Admin"
+    #             new_admin_role = models.Admin_roles(id_admin_role=id_admin_role,
+    #                                                 admin_role_name=admin_role_name)
+    #             db.session.add(new_admin_role)
+    #
+    #             id_admin_role = 2
+    #             admin_role_name = "Election Admin"
+    #             new_admin_role = models.Admin_roles(id_admin_role=id_admin_role,
+    #                                                 admin_role_name=admin_role_name)
+    #             db.session.add(new_admin_role)
+    #
+    #             user_firstname = "admin"
+    #             user_lastname = "admin"
+    #             user_so_name = "admin"
+    #             user_pass = "adminpassword"
+    #             id_admin_role = 1
+    #             user_email = "no@email.com"
+    #             user_status = 1
+    #             user_pw_change = 'N'
+    #             new_user = User(user_firstname=user_firstname,
+    #                             user_lastname=user_lastname,
+    #                             user_so_name=user_so_name,
+    #                             user_pass=generate_password_hash(user_pass, method='scrypt', salt_length=16),
+    #                             id_admin_role=id_admin_role,
+    #                             user_email=user_email,
+    #                             user_status=user_status,
+    #                             user_pw_change=user_pw_change)
+    #
+    #             db.session.add(new_user)
+    #             db.session.commit()
+    #
+    #         except exc.SQLAlchemyError as sqlalchemyerror:
+    #             db.session.rollback()
+    #             logger.info("got the following SQLAlchemyError: " + str(sqlalchemyerror))
+    #         except Exception as exception:
+    #             logger.info("got the following Exception: " + str(exception))
+    #         finally:
+    #             logger.info("db.create_all() in __init__.py was successfull - no exceptions were raised")
 
 
 def config_manager(manager):
