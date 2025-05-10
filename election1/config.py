@@ -15,7 +15,10 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', '5thn4ruj88i9')
     # REMEMBER_COOKIE_DURATION = timedelta(minutes=10)
     REMEMBER_COOKIE_DURATION = timedelta(seconds=20)
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///election.db'
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///election.db'
+
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:T4yl0rSw1ft@localhost/election'
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # the following home value is used in the demo to redirect to a specific page
 
