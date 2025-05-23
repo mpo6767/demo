@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}
+  Ballot Type Page
+{% endblock %}
+
+
+<body>
+{% block content %}
+    <div class="container">
+        <h1> Ballot Types..</h1>
+        <br>
+        <form method="post" style="color:white" autocomplete="off" >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="row g-3 ">
+                <div class="col-2 ">
+                     {{ form.ballot_type_name.label() }}
+                </div>
+                 <div class="col-auto" >
+                    {{ form.ballot_type_name() }}
+                </div>
+                 <div class="col-sm-2" autofocus>
+                    <span id="passwordHelpInline" class="form-text" >
+                        <b> types of ballots. </b>
+                    </span>
+                </div>
+            </div>
+            <br>
+
+            <br>
+
+            <div class="d-grid gap-2 d-md-block">
+                {{ form.submit(type="submit",value='Add Ballot Type', class="btn   btn-primary") }}
+            </div>
+            <br><br>
+        </form>
+        <div class="container">
+            <table class="table-dark">
+               <thead>
+                   <tr>
+                       <th class="col-2"> Ballot Type ID</th>
+                       <th class="col-2"> Ballot Type</th>
+                   </tr>
+               </thead>
+
+               <tbody>
+               {% for ballot in ballot_types%}
+                <tr>
+                    <td>{{ ballot[0] }}</td>
+                    <td>{{ ballot[1] }}</td>
+
+                </tr>
+                {% endfor %}
+               </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+</body>
