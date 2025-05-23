@@ -99,6 +99,8 @@ def deleteclass(xid):
         candidates = Candidate.get_candidates_by_classgrp(xid)
         return render_template('classgrp_candidate_delete.html', form=form, candidates=candidates,
                                classgrp_to_delete=classgrp_to_delete)
+
+
 @classgrp.route('/updateclass/<int:xid>', methods=['GET', 'POST'])
 def updateclass(xid):
 

@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import current_user
 
 from election1.candidate.form import CandidateForm, Candidate_reportForm,  WriteinCandidateForm
-from election1.models import Classgrp, Office, Candidate, WriteinCandidate, Dates
+from election1.models import Classgrp, Office, Candidate, WriteinCandidate, Dates, Party
 from election1.extensions import db
 from sqlalchemy.exc import SQLAlchemyError
 from election1.utils import is_user_authenticated, session_check
@@ -144,19 +144,25 @@ def candidate_view():
         lastname = request.form['lastname']
         choices_classgrp = request.form['choices_classgrp']
         choices_office = request.form['choices_office']
+        choices_party = request.form['choices_party']
 
         # Check if a valid option is selected
         if choices_classgrp == "Please select":
             flash('Please select a valid option for class', category='danger')
             form.choices_classgrp.choices = Classgrp.classgrp_query()
             form.choices_office.choices = Office.office_query()
+            form.choices_party.choices = Party.get_all_parties_ordered_by_name()
             return render_template('candidate.html', form=form)
 
         if choices_office == "Please select":
             flash('Please select a valid option for office', category='danger')
             form.choices_office.choices = Office.office_query()
             form.choices_classgrp.choices = Classgrp.classgrp_query()
+            form.choices_party.choices = Party.get_all_parties_ordered_by_name()
             return render_template('candidate.html', form=form)
+
+        if choices_party == "If candidate associated Please select":
+            choices_party = None
 
         if Candidate.check_existing_candidate(firstname, lastname, choices_classgrp) is True:
             flash('Candidate already exists for this class', category='danger')
@@ -165,7 +171,8 @@ def candidate_view():
         new_candidate = Candidate(firstname=firstname,
                                   lastname=lastname,
                                   id_classgrp=choices_classgrp,
-                                  id_office=choices_office)
+                                  id_office=choices_office,
+                                  id_party=choices_party)
 
         try:
             db.session.add(new_candidate)
@@ -180,6 +187,7 @@ def candidate_view():
     else:
         form.choices_classgrp.choices = Classgrp.classgrp_query()
         form.choices_office.choices = Office.office_query()
+        form.choices_party.choices = Party.get_all_parties_ordered_by_name()
         return render_template('candidate.html', form=form)
 
 
