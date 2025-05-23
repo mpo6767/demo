@@ -2,7 +2,7 @@ import os
 from .config import Config  # Import the Config class
 import logging.config
 from flask import Flask, session
-from .models import User
+from .models import User, Party
 from werkzeug.security import generate_password_hash
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy import exc, create_engine
@@ -42,6 +42,7 @@ def config_blueprint(app):
     from election1.candidate.view import candidate
     from election1.misc.view import misc
     from election1.results.view import results
+    from election1.ballot.view import ballot
     app.register_blueprint(candidate)
     app.register_blueprint(office)
     app.register_blueprint(admins)
@@ -51,6 +52,7 @@ def config_blueprint(app):
     app.register_blueprint(dates)
     app.register_blueprint(misc)
     app.register_blueprint(results)
+    app.register_blueprint(ballot)
 
 def config_extention(app):
     """
@@ -76,6 +78,7 @@ def config_extention(app):
             try:
                 db.create_all()
                 logger.info("Tables created successfully.")
+
                 id_admin_role = 1
                 admin_role_name = "Super Admin"
                 new_admin_role = models.Admin_roles(id_admin_role=id_admin_role,
@@ -96,7 +99,7 @@ def config_extention(app):
                 user_email = "no@email.com"
                 user_status = 1
                 user_pw_change = 'N'
-                new_user = User(user_firstname=user_firstname,
+                new_user = models.User(user_firstname=user_firstname,
                                 user_lastname=user_lastname,
                                 user_so_name=user_so_name,
                                 user_pass=generate_password_hash(user_pass, method='scrypt', salt_length=16),
@@ -106,6 +109,26 @@ def config_extention(app):
                                 user_pw_change=user_pw_change)
 
                 db.session.add(new_user)
+                db.session.commit()
+
+                party_name = "Democratic"
+                party_abbreviation = "D"
+                new_party = models.Party(party_name=party_name,
+                                         party_abbreviation=party_abbreviation)
+                db.session.add(new_party)
+
+                party_name = "Republican"
+                party_abbreviation = "R"
+                new_party = models.Party(party_name=party_name,
+                                         party_abbreviation=party_abbreviation)
+                db.session.add(new_party)
+
+                party_name = "Independent"
+                party_abbreviation = "I"
+                new_party = models.Party(party_name=party_name,
+                                         party_abbreviation=party_abbreviation)
+                db.session.add(new_party)
+
                 db.session.commit()
 
             except Exception as e:
