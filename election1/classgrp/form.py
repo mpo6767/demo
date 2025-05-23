@@ -6,8 +6,8 @@ from election1.models import Classgrp
 
 class ClassgrpForm(FlaskForm):
 
-    name = StringField(label='Class or Group . . .', validators=[Length(min=2, max=30), DataRequired()])
-    sortkey = IntegerField(label='Sort Key . . .', validators=[DataRequired()])
+    name = StringField(label='Class or Group', validators=[Length(min=2, max=30), DataRequired()])
+    sortkey = IntegerField(label='Sort Key', validators=[DataRequired()])
     submit = SubmitField(label='submit')
 
     @staticmethod
