@@ -5,7 +5,8 @@ from flask_login import UserMixin
 from datetime import datetime
 from election1.utils import unique_security_token
 from sqlalchemy import func
-
+from sqlalchemy.orm import joinedload
+from sqlalchemy.exc import IntegrityError
 class BallotType(db.Model):
     """
     Represents the type of ballot used in the election.
@@ -70,19 +71,6 @@ class Office(db.Model):
     id_ballot_type = db.Column(db.Integer, db.ForeignKey('ballot_type.id_ballot_type'), nullable=False)
     id_ballot_measure = db.Column(db.Integer, db.ForeignKey('ballot_measure.id_ballot_measure'), nullable=True)
     candidates = db.relationship('Candidate', cascade="all, delete-orphan", backref='office')
-
-    # @classmethod
-    # def office_query(cls):
-    #     return [
-    #         {
-    #             "id_office": o.id_office,
-    #             "office_title": o.office_title,
-    #             "office_vote_for": o.office_vote_for,
-    #             "sortkey": o.sortkey,
-    #             "ballot_type_name": o.ballot_type.ballot_type_name
-    #         }
-    #         for o in cls.query.options(db.joinedload(cls.ballot_type)).order_by(cls.sortkey).all()
-    #     ]
 
     @classmethod
     def office_query(cls):
@@ -157,10 +145,6 @@ class Candidate(db.Model):
         return db.session.query(cls, Classgrp, Office).select_from(cls).join(Classgrp).join(
             Office).filter(Classgrp.id_classgrp == choices_classgrp)
 
-    # @classmethod
-    # def candidate_search(cls, group):
-    #     return db.session.query(cls, Classgrp, Office).select_from(cls).join(Classgrp).join(
-    #         Office).order_by(Classgrp.sortkey, Office.sortkey).where(Classgrp.id_classgrp == group)
 
     @classmethod
     def candidate_search(cls, group):
@@ -216,10 +200,26 @@ class Candidate(db.Model):
             id_classgrp=id_classgrp
         ).first() is not None
 
+
+
     @classmethod
     def get_candidates_by_office(cls, office_id):
-        return db.session.query(cls).filter_by(id_office=office_id).all()
+        from sqlalchemy.orm import joinedload
 
+        candidates = cls.query.options(
+            joinedload(cls.classgrp),  # Load related ClassGroup
+            joinedload(cls.office)  # Load related Office
+        ).filter_by(id_office=office_id).all()
+
+        return [
+            {
+                "firstname": candidate.firstname,
+                "lastname": candidate.lastname,
+                "classgroup_name": candidate.classgrp.name if candidate.classgrp else "No Class Group",
+                "office_name": candidate.office.office_title if candidate.office else "No Office"
+            }
+            for candidate in candidates
+        ]
     @classmethod
     def get_summary_results(cls):
         """
