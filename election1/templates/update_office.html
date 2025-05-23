@@ -1,66 +1,101 @@
 {% extends 'base.html' %}
 {% block title %}
- Office Update Page
+  Office Update Page
 {% endblock %}
 
 
 
 <body>
 {% block content %}
-    <div class="container">
-        <h1>Update Office ...</h1>
-        <br>
-        <form  method="POST" style="color:white">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-              <div class="row g-3 ">
-                <div class="col-2 ">
-                     {{ form.office_title.label() }}
-
-                </div>
-                 <div class="col-auto">
-                    {{ form.office_title(class="form-control", value=office_to_update.office_title) }}
-                 </div>
-                 <div class="col-sm-2">
-                    <span id="HelpInline" class="form-text">
-                       Enter office name.
+  <div class="container">
+    <h1> Edit Offices,Post or Measure </h1>
+    <br>
+    <form method="post" style="color:white" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="container">
+        <div class="row">
+          <div class="col-2">
+            {{ form.office_title.label() }}
+          </div>
+          <div class="col-lg-4">
+            <input type="text" id="office_title" name="office_title" value="{{ office_to_update.office_title }}">
+          </div>
+          <div class="col-6">
+                    <span id="passwordHelpInline" class="form-text">
+                        <b> Enter the title of the office or post. </b>
                     </span>
-                </div>
-            </div>
-            <br>
-            <div class="row g-3 ">
-                <div class="col-2 ">
-                     {{ form.office_vote_for.label() }}
-                </div>
-                 <div class="col-auto" >
-                    {{ form.office_vote_for(class="form-control", value=office_to_update.office_vote_for) }}
-                </div>
-                 <div class="col-sm-2" autofocus>
-                    <span id="passwordHelpInline" class="form-text" >
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <div class="container">
+        <div class="row">
+          <div class="col-2">
+            {{ form.ballot_type.label() }}
+          </div>
+          <div class="col-lg-4">
+
+            <select class="form-select form-select-sm" aria-label=".form-select-sm example" name="ballot_type">
+              {% for p in form.ballot_type.choices %}
+                <option value="{{ p[0] }}" {% if p[0] == office_to_update.id_ballot_type %}selected{% endif %}>
+                  {{ p[1] }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-6">
+                    <span id="passwordHelpInline" class="form-text">
+                        <b> Select the Ballot Type </b>
+                    </span>
+          </div>
+        </div>
+      </div>
+
+      <br>
+
+      <div class="container">
+        <div class="row">
+          <div class="col-2">
+            {{ form.office_vote_for.label() }}
+          </div>
+          <div class="col-lg-4">
+            <input type="text" id="office_vote_for" name="office_vote_for"
+                   value="{{ office_to_update.office_vote_for }}">
+          </div>
+          <div class="col-6">
+                    <span id="passwordHelpInline" class="form-text">
                         <b> Max Candidates to Vote For. </b>
                     </span>
-                </div>
-            </div>
+          </div>
+        </div>
+      </div>
 
-            <br>
-            <div class="row g-3">
-                <div class="col-2">
-                     {{ form.sortkey.label() }}
-                </div>
-                 <div class="col-auto">
-                    {{ form.sortkey(class="form-control", value=office_to_update.sortkey) }}
-                </div>
-                 <div class="col-sm-2">
-                    <span id="HelpInline" class="form-text">
-                       For sort order in dropdowns USE INTEGER
+      <br>
+      <div class="container">
+        <div class="row">
+          <div class="col-2">
+            {{ form.sortkey.label() }}
+          </div>
+          <div class="col-lg-4">
+            <input type="text" id="sortkey" name="sortkey" value="{{ office_to_update.sortkey }}">
+          </div>
+          <div class="col-6">
+                    <span id="passwordHelpInline" class="form-text">
+                        <b>For sort order in dropdowns.  Use up down arrows in entry field or keyboard.  Or, enter number.</b>
                     </span>
-                </div>
-            </div>
-            <br><br>
-            <div class="d-grid gap-2 d-md-block">
-                {{ form.submit(type="submit",value='Update Office', class="btn   btn-primary") }}
-            </div>
-        </form>
-    </div>
+          </div>
+        </div>
+      </div>
+
+      <br>
+      <div class="col-2 d-grid gap-2 d-sm-block">
+        {{ form.submit(type="submit",value='Update Office', class="btn   btn-primary") }}
+      </div>
+      <br><br>
+    </form>
+  </div>
 
 {% endblock %}
 </body>
