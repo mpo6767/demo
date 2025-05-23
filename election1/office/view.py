@@ -1,14 +1,18 @@
 from flask import (render_template, url_for, flash, redirect, request, Blueprint, current_app)
 from election1.office.form import (OfficeForm)
-from election1.models import Classgrp, Office, Candidate, Dates
+from election1.models import Office, Candidate, Dates, BallotType
 from election1.extensions import db
 from sqlalchemy.exc import SQLAlchemyError
 import logging
 from election1.utils import is_user_authenticated, session_check
 from flask_login import current_user
 
+from sqlalchemy.orm import joinedload
+
 office = Blueprint('office', __name__)
 logger = logging.getLogger(__name__)
+
+
 
 
 @office.before_request
@@ -17,6 +21,7 @@ def check_session_timeout():
         home = current_app.config['HOME']
         error = 'idle timeout '
         return render_template('session_timeout.html', error=error, home=home)
+    return None  # Explicitly return None to indicate the request should proceed
 
 
 @office.route('/office', methods=['POST', 'GET'])
@@ -37,44 +42,60 @@ def office_view():
 
     office_form = OfficeForm()
 
-    if office_form.validate_on_submit():
+    if request.method == 'POST':
         office_title = request.form['office_title']
         sortkey = request.form['sortkey']
         office_vote_for = request.form['office_vote_for']
+        id_ballot_type = (request.form['ballot_type'])
 
 
 
-        new_office = Office(office_title=office_title, sortkey=sortkey, office_vote_for=office_vote_for)
+        new_office = Office(office_title=office_title,
+                            sortkey=sortkey,
+                            office_vote_for=office_vote_for,
+                            id_ballot_type=id_ballot_type)
 
         try:
             db.session.add(new_office)
             db.session.commit()
             logger.info(
                 'user ' + str(current_user.user_so_name) + ' has created the office titled ' + office_title)
-            office_form.office_title.data = ''
-            office_form.sortkey.data = None
-            offices = Office.query.order_by(Office.sortkey)
             flash('successfully inserted record', category='success')
+
+            office_form, offices = prepare_office_form()
             return render_template('office.html', form=office_form, offices=offices)
         except Exception as e:
             db.session.rollback()
+            if 'office_title' in str(getattr(e, 'orig', '')):
+                flash('The Office Title must be unique in database.', category='danger')
+            elif 'sortkey' in str(getattr(e, 'orig', '')):
+                flash('The Sort Key must be unique in database.', category='danger')
+            elif 'id_ballot_type' in str(getattr(e, 'orig', '')):
+                flash('you must select a Ballot Type.', category='danger')
+            else:
+                flash(f'An error occurred: copy and send to admin \r\n{e}', category='danger')
+
             logger.info('There is an error ' + str(e) + ' while creating the office titled ' + office_title)
-            flash('There was a problem inserting record ' + str(e), category='danger')
-            office_form.office_title.data = ''
-            office_form.sortkey.data = None
+            # office_form, offices = prepare_office_form()
             offices = Office.query.order_by(Office.sortkey)
-            return render_template('office.html', form=office_form, offices=offices)
-    else:
-        for err_msg in office_form.errors.values():
-            flash(f'there is an error creating office: {err_msg}', category='danger')
-            offices = Office.query.order_by(Office.sortkey)
+            office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
             return render_template('office.html', form=office_form, offices=offices)
 
-    office_form.office_title.data = ''
-    office_form.sortkey.data = None
-    # office_form.office_vote_for = 1
-    offices = Office.query.order_by(Office.sortkey)
+    office_form, offices = prepare_office_form()
+
+
     return render_template('office.html', form=office_form, offices=offices)
+
+def prepare_office_form():
+    office_form = OfficeForm()
+    office_form.office_title.data = None
+    office_form.office_vote_for.data = None
+    office_form.sortkey.data = None
+    office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
+    # Query offices with their related BallotType records
+    offices = Office.query.options(joinedload(Office.ballot_type)).order_by(Office.sortkey).all()
+
+    return office_form, offices
 
 
 @office.route('/deleteoffice/<int:xid>', methods=['POST', 'GET'])
@@ -134,6 +155,7 @@ def updateoffice(xid):
         office_to_update.office_title = request.form['office_title']
         office_to_update.sortkey = request.form['sortkey']
         office_to_update.office_vote_for = request.form['office_vote_for']
+        office_to_update.id_ballot_type = request.form['ballot_type']
 
         try:
             db.session.commit()
@@ -155,5 +177,7 @@ def updateoffice(xid):
             offices = Office.query.order_by(Office.sortkey)
             return render_template('office.html', form=office_form, offices=offices)
     else:
+        office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
+        print(office_to_update.office_title)
         return render_template('update_office.html', form=office_form,
                                office_to_update=office_to_update,)
