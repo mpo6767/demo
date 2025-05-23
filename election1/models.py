@@ -1,3 +1,5 @@
+from sqlalchemy.orm import joinedload
+
 from election1.extensions import db
 from flask_login import UserMixin
 from datetime import datetime
@@ -13,7 +15,22 @@ class BallotType(db.Model):
     creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
     offices = db.relationship('Office', backref='ballot_type', cascade="all, delete-orphan")
 
+    @classmethod
+    def check_if_exists(cls, ballot_type_name):
+        """
+        Check if a BallotType with the given name exists in the database.
+        :param ballot_type_name: The name of the BallotType to check.
+        :return: True if the BallotType exists, False otherwise.
+        """
+        return cls.query.filter_by(ballot_type_name=ballot_type_name).first() is not None
 
+    @classmethod
+    def get_all_ballot_types_sorted_by_name(cls):
+        """
+        Retrieve all BallotType records sorted by ballot_type_name.
+        :return: A tuple of BallotType objects sorted by ballot_type_name.
+        """
+        return tuple((c.id_ballot_type, c.ballot_type_name) for c in cls.query.order_by(cls.id_ballot_type).all())
 
 class Classgrp(db.Model):
     """
@@ -54,9 +71,28 @@ class Office(db.Model):
     id_ballot_measure = db.Column(db.Integer, db.ForeignKey('ballot_measure.id_ballot_measure'), nullable=True)
     candidates = db.relationship('Candidate', cascade="all, delete-orphan", backref='office')
 
+    # @classmethod
+    # def office_query(cls):
+    #     return [
+    #         {
+    #             "id_office": o.id_office,
+    #             "office_title": o.office_title,
+    #             "office_vote_for": o.office_vote_for,
+    #             "sortkey": o.sortkey,
+    #             "ballot_type_name": o.ballot_type.ballot_type_name
+    #         }
+    #         for o in cls.query.options(db.joinedload(cls.ballot_type)).order_by(cls.sortkey).all()
+    #     ]
+
     @classmethod
     def office_query(cls):
-        return[(o.id_office, o.office_title) for o in cls.query.order_by(cls.sortkey).all()]
+        return [
+            (o.id_office, o.office_title, b.ballot_type_name)
+            for o, b in db.session.query(cls, BallotType)
+            .join(BallotType, cls.id_ballot_type == BallotType.id_ballot_type)
+            .order_by(cls.sortkey)
+            .all()
+        ]
 
     @classmethod
     def query_offices_for_classgroup_with_details_as_list(cls, classgroup_name):
@@ -70,6 +106,34 @@ class Office(db.Model):
 
         return [[office.office_title, office.sortkey, office.office_vote_for] for office in offices]
 
+    @classmethod
+    def check_existing_office_title(cls, office_title):
+        """
+        Check if an office with the given title exists in the database.
+        :param office_title: The title of the office to check.
+        :return: True if the office exists, False otherwise.
+        """
+        return cls.query.filter_by(office_title=office_title).first() is not None
+
+
+class Party(db.Model):
+    """
+    Represents a political party in the election system.
+    """
+    id_party = db.Column(db.Integer, primary_key=True)
+    party_name = db.Column(db.String(length=45), nullable=False, unique=True)
+    party_abbreviation = db.Column(db.String(length=1   ), nullable=False, unique=True)
+    creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    candidates = db.relationship('Candidate', backref='party', cascade="all, delete-orphan")
+
+    @classmethod
+    def get_all_parties_ordered_by_name(cls):
+        """
+        Retrieve all Party records ordered by party_name.
+        :return: A tuple of tuples containing (id_party, party_name).
+        """
+        return tuple((party.id_party, party.party_name) for party in cls.query.order_by(cls.party_name).all())
+
 class Candidate(db.Model):
     """
     Represents a candidate running for an office in a specific class or group.
@@ -80,6 +144,7 @@ class Candidate(db.Model):
     creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
     id_classgrp = db.Column(db.Integer, db.ForeignKey('classgrp.id_classgrp'), nullable=False)
     id_office = db.Column(db.Integer, db.ForeignKey('office.id_office'), nullable=False)
+    id_party = db.Column(db.Integer, db.ForeignKey('party.id_party'), nullable=True)
     votes = db.relationship('Votes', backref='candidate')
 
     @classmethod
@@ -92,10 +157,21 @@ class Candidate(db.Model):
         return db.session.query(cls, Classgrp, Office).select_from(cls).join(Classgrp).join(
             Office).filter(Classgrp.id_classgrp == choices_classgrp)
 
+    # @classmethod
+    # def candidate_search(cls, group):
+    #     return db.session.query(cls, Classgrp, Office).select_from(cls).join(Classgrp).join(
+    #         Office).order_by(Classgrp.sortkey, Office.sortkey).where(Classgrp.id_classgrp == group)
+
     @classmethod
     def candidate_search(cls, group):
-        return db.session.query(cls, Classgrp, Office).select_from(cls).join(Classgrp).join(
-            Office).order_by(Classgrp.sortkey, Office.sortkey).where(Classgrp.id_classgrp == group)
+        return db.session.query(
+            cls,
+            Classgrp,
+            Office,
+            Party.party_abbreviation.label('party_abbreviation')
+        ).select_from(cls).join(Classgrp).join(Office).outerjoin(Party).order_by(
+            Classgrp.sortkey, Office.sortkey
+        ).where(Classgrp.id_classgrp == group)
 
     @classmethod
     def check_and_insert_writein_candidate(cls, choices_classgrp, choices_office):
