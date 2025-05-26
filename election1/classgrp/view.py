@@ -125,18 +125,25 @@ def updateclass(xid):
             db.session.commit()
             flash('successfully updates record', category='success')
             classgrp_form.name.data = ''
-            classgrp_form.sortkey.data = ''
+            classgrp_form.sortkey.data = None
+            print('classgrp_form.name.data', classgrp_form.name.data)
             classgrps = Classgrp.query.order_by(Classgrp.sortkey)
             logger.info('user ' + str(current_user.user_so_name) + " has edit classgrp " + str(classgrp_to_update.name))
-            return render_template('classgrp.html', form=classgrp_form, classgrps=classgrps)
+            # return render_template('classgrp.html', form=classgrp_form, classgrps=classgrps)
+            return redirect('/classgrp')
         except SQLAlchemyError as e:
+
             db.session.rollback()
             flash('There was a problem updating record record ' + str(e), category='danger')
             classgrp_form.name.data = ''
             classgrp_form.sortkey.data = ''
+
             classgrps = Classgrp.query.order_by(Classgrp.sortkey)
             return render_template('classgrp.html', form=classgrp_form, classgrps=classgrps)
     else:
+        print()
+        classgrp_form.name.data = ''
+        classgrp_form.sortkey.data = ''
         return render_template('update_classgrp.html', form=classgrp_form,
                                classgrp_to_update=classgrp_to_update)
 
