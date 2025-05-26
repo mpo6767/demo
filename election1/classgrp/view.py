@@ -51,7 +51,7 @@ def classgrp_view():
         logger.info('user ' + str(current_user.user_so_name) + " has created class group " + str(classgrp_name))
         flash('successfully added record', category='success')
         # classgrps = Classgrp.query.order_by(Classgrp.sortkey)
-        # return render_template('classgrp.html', form=classgrp_form, classgrps=classgrps)
+        return redirect('/classgrp')
     else:
         for err_msg in classgrp_form.errors.values():
             flash(f'there is an error creating a class or group: {err_msg}', category='danger')
