@@ -8,6 +8,8 @@ from election1 import logger, User
 from election1.admins.form import LoginForm
 from flask_login import login_user, logout_user, login_required, current_user
 
+from election1.utils import session_check
+
 mains = Blueprint('mains', __name__)
 
 @mains.route('/', methods=['GET'])
@@ -25,6 +27,11 @@ def index():
 @mains.route('/home', methods=['GET'])
 @mains.route('/homepage', methods=['GET'])
 def homepage():
+
+    if not session_check():
+        home = current_app.config['HOME']
+        error = 'idle timeout '
+        return render_template('session_timeout.html', error=error, home=home)
 
     logger.info("Entered homepage")
     return render_template('homepage.html')
