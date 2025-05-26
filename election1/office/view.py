@@ -63,7 +63,7 @@ def office_view():
             flash('successfully inserted record', category='success')
 
             office_form, offices = prepare_office_form()
-            return render_template('office.html', form=office_form, offices=offices)
+            return redirect('/office')
         except Exception as e:
             db.session.rollback()
             if 'office_title' in str(getattr(e, 'orig', '')):
@@ -164,20 +164,24 @@ def updateoffice(xid):
                     current_user.user_so_name) + ' has edited the office titled ' + office_to_update.office_title)
             flash('successfully updates record', category='success')
 
-            # office_form.office_title.data = ''
-            # office_form.sortkey.data = 0
-            # office_form.office_vote_for.data = 1
-            # offices = Office.query.order_by(Office.sortkey)
             return redirect('/office')
         except SQLAlchemyError as e:
             db.session.rollback()
-            flash('There was a problem updating record record' + str(e), category='danger')
-            office_form.office_title.data = ''
-            office_form.sortkey.data = ''
-            offices = Office.query.order_by(Office.sortkey)
-            return render_template('office.html', form=office_form, offices=offices)
+            if 'office_title' in str(getattr(e, 'orig', '')):
+                flash('The Office Title must be unique in database.', category='danger')
+            elif 'sortkey' in str(getattr(e, 'orig', '')):
+                flash('The Sort Key must be unique in database.', category='danger')
+            elif 'id_ballot_type' in str(getattr(e, 'orig', '')):
+                flash('you must select a Ballot Type.', category='danger')
+            else:
+                flash(f'An error occurred: copy and send to admin \r\n{e}', category='danger')
+            office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
+            return render_template('update_office.html', form=office_form,
+                                   office_to_update=office_to_update, )
+
+
+
     else:
         office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
-        print(office_to_update.office_title)
         return render_template('update_office.html', form=office_form,
                                office_to_update=office_to_update,)
