@@ -4,18 +4,17 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container">
+  <div class="container text-left">
     <h1> Candidates</h1>
-<br>
+    <br>
     <form method="POST" style="color:white" autocomplete="off">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-      <div class="container">
+      <div class="container ">
         <div class="row ">
           <div class="col-2 ">
             {{ form.choices_classgrp.label() }}
           </div>
-
 
           <div class="col-lg-4">
             <select class="form-select form-select-sm mb-3" aria-label="Large select example" name="choices_classgrp"
@@ -54,8 +53,13 @@
             {{ form.firstname.label() }}
           </div>
 
-          <div class="col-auto">
-            {{ form.firstname() }}
+          <div class="col-lg-4">
+            {{ form.firstname(maxlength="45") }}
+          </div>
+          <div class="col-6">
+                    <span id="passwordHelpInline" class="form-text">
+                        <b> First name is required</b>
+                    </span>
           </div>
         </div>
       </div>
@@ -66,8 +70,13 @@
             {{ form.lastname.label() }}
           </div>
 
-          <div class="col-auto">
-            {{ form.lastname() }}
+          <div class="col-lg-4">
+            {{ form.lastname(maxlength="45") }}
+          </div>
+          <div class="col-6">
+                    <span id="passwordHelpInline" class="form-text">
+                        <b> Last Name is NOT because of binary (Y or N) type ballots</b>
+                    </span>
           </div>
         </div>
       </div>
