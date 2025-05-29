@@ -14,7 +14,7 @@ def office_query():
 
 class CandidateForm(FlaskForm):
     firstname = StringField(label='First Name', validators=[Length(min=2, max=30), InputRequired()])
-    lastname = StringField(label='Last Name', validators=[Length(min=2, max=30), DataRequired()])
+    lastname = StringField(label='Last Name', validators=[Length(min=2, max=30)])
     choices_classgrp = SelectField('Group', choices=[], validators=[Length(min=2, max=30), DataRequired()])
     choices_office = SelectField('Office Title', choices=[], validators=[Length(min=2, max=30), DataRequired()])
     choices_party = SelectField('Party', choices=[], validators=[Length(min=2, max=30), DataRequired()])

@@ -128,7 +128,7 @@ class Candidate(db.Model):
     """
     id_candidate = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(length=45), nullable=False)
-    lastname = db.Column(db.String(length=45), nullable=False)
+    lastname = db.Column(db.String(length=45), nullable=True)
     creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
     id_classgrp = db.Column(db.Integer, db.ForeignKey('classgrp.id_classgrp'), nullable=False)
     id_office = db.Column(db.Integer, db.ForeignKey('office.id_office'), nullable=False)
