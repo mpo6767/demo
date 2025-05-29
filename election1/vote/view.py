@@ -21,9 +21,13 @@ def cast(grp_list, token):
     log_vote_event('+++ cast '
                    f"grp_list: {grp_list}, token: {token}, ")
 
+
+    # uncomment the following to check if the date time is valid for voting
+
     # if not date_between():
     #     home = current_app.config['HOME']
     #     return render_template('bad_date.html', home=home)
+
 
     # Check if there is no session then check the validity of the token
     # when a voter comes to the cast page it votes in a single session
@@ -33,7 +37,6 @@ def cast(grp_list, token):
                        f' for grp_list: {grp_list}, and token: {token}, ')
 
     # validate the groups are valid - the groups along with the token are in the url
-
         if not are_all_classgrps_valid(grp_list):
             log_vote_event(f"Invalid class group: {grp_list}")
             home = current_app.config['HOME']
@@ -88,13 +91,18 @@ def cast(grp_list, token):
         session['token_list_record'] = token_list_record
         print('token_list_record ' + str(session.get('token_list_record')))
 
-        # in a school election the groups are the classes at a minimum
-        # the grp_pointer is the current group number there maybe more than 1
-        # this is setups up for the first group or only group in the list
+
+        '''
+        in a school election the groups are the classes at a minimum
+        the grp_pointer is the current group number there maybe more than 1
+        this is setups up for the first group or only group in the list
+        '''
+
         session['grp_pointer'] = 0
         print('session grp_pointer ' + str(session.get('grp_pointer')))
 
-        # the grp_list is the list of groups for the voter its in the url in this case
+        # the grp_list is the list of groups for the voter the list is in the url
+        #
         log_vote_event('grp_list ' + grp_list)
         session['grp_list'] = grp_list
         print('grp_list ' + grp_list)
@@ -142,6 +150,7 @@ def cast(grp_list, token):
         # office_dict = session.get('office_dict', None)
 
         next_office = get_next_office_for_group(session.get('office_dict'), session.get('group'))
+        print()
         if next_office is None:
             if session['grp_pointer'] + 1 < session['grp_list_length']:
                 session['grp_pointer'] += 1
