@@ -351,11 +351,13 @@ def post_ballot():
         # (Add your logic here to handle the ballot submission)
         for group in office_dict:
             for office in office_dict[group]:
+                item_ctr = 0
                 for item in office[3]:
                     if item[0] != 99:
-                        new_vote = Votes(id_candidate=item[0], votes_token=token, votes_writein_name=office[4][0])
+                        new_vote = Votes(id_candidate=item[0], votes_token=token, votes_writein_name=office[4][item_ctr])
                         db.session.add(new_vote)
                         log_vote_event(f"Vote submitted for candidate {item[0]} - {item[1]}")
+                        item_ctr += 1
                         pass
         try:
             token_record = Tokenlist.query.filter_by(token=token).first()
