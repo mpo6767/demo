@@ -2,7 +2,7 @@ import os
 from .config import Config  # Import the Config class
 import logging.config
 from flask import Flask, session
-from .models import User, Party
+from .models import User, Party, BallotType
 from werkzeug.security import generate_password_hash
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy import exc, create_engine
@@ -128,6 +128,22 @@ def config_extention(app):
                 new_party = models.Party(party_name=party_name,
                                          party_abbreviation=party_abbreviation)
                 db.session.add(new_party)
+
+                ballot_type_name = "Normal"
+                new_ballot = BallotType(ballot_type_name=ballot_type_name)
+                db.session.add(new_ballot)
+
+                ballot_type_name = "Measure"
+                new_ballot = BallotType(ballot_type_name=ballot_type_name)
+                db.session.add(new_ballot)
+
+                ballot_type_name = "Single Name"
+                new_ballot = BallotType(ballot_type_name=ballot_type_name)
+                db.session.add(new_ballot)
+
+                ballot_type_name = "Rank Choice"
+                new_ballot = BallotType(ballot_type_name=ballot_type_name)
+                db.session.add(new_ballot)
 
                 db.session.commit()
 
