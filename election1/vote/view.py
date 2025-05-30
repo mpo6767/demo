@@ -72,7 +72,7 @@ def cast(grp_list, token):
             log_vote_event(f"Token is bad: {token_list_record['error']} - Token: {token}")
             return render_template('bad_token.html', error=token_list_record['error'], home=home)
 
-    # the token seems good so log the event.   This does not mean that the voter has voted
+        # the token seems good so log the event.   This does not mean that the voter has voted
         log_vote_event(f"Token is good: {token}")
         log_vote_event('token_list_record ' + str(token_list_record))
 
@@ -150,7 +150,6 @@ def cast(grp_list, token):
         # office_dict = session.get('office_dict', None)
 
         next_office = get_next_office_for_group(session.get('office_dict'), session.get('group'))
-        print()
         if next_office is None:
             if session['grp_pointer'] + 1 < session['grp_list_length']:
                 session['grp_pointer'] += 1
@@ -168,15 +167,17 @@ def cast(grp_list, token):
             candidate_choices = office_grp_query(grp, next_office[0])
             print('candidate_choices a ' + str(candidate_choices))
             writein_candidate_id = has_writein_candidate(candidate_choices)
+            print('writein_candidate_id ' + str(writein_candidate_id))
             html_writein = 0
             if writein_candidate_id is not None:
                 html_writein = writein_candidate_id
                 filtered_choices = remove_writein_candidate(candidate_choices, writein_candidate_id)
                 VoteForOne.candidate.choices = filtered_choices
             else:
-                # html_writein = 0
+
                 VoteForOne.candidate.choices = candidate_choices
-            print ('VoteForOne.candidate.choices ' + str(VoteForOne.candidate.choices))
+                print ('VoteForOne.candidate.choices ' + str(VoteForOne.candidate.choices))
+
             return render_template('cast1.html', form=votes_form, office=next_office[0],
                                    candidates=VoteForOne.candidate.choices, grp=grp, html_writein=html_writein)
 
@@ -186,16 +187,13 @@ def cast(grp_list, token):
             return render_template('cast2.html', form=votes_form, office=next_office[0],
                                    candidates=candidate_choices, grp=grp, max_votes=next_office[2])
 
-    # if form_voteForeOne.validate_on_submit() and form_voteForeOne.submit.data:
+# this is the end of session
+
     log_vote_event('167 ')
     log_vote_event('check request.method ' + request.method)
     if request.method == 'POST' or session.get('review', False):
         session['review'] = False
         form_name = request.form.get('form_name')
-        if form_name == 'ReviewVotes':
-            return 'ReviewVotes'
-
-
 
         group = session.get('group')
         office = session.get('office')
@@ -208,11 +206,12 @@ def cast(grp_list, token):
                         # Add the selected_candidate_id to the list of candidates voted for
                         log_vote_event('log this non final ' + str(selected_candidate_id))
                         candidate_values = str(selected_candidate_id).split('$')
-                        # office_entry[3].append(candidate_values[0])
-                        office_entry[3].append([candidate_values[0], candidate_values[1]])
+
                         if candidate_values[1] == "Write In":
+                            office_entry[3].append([candidate_values[0],  request.form.get('writein_name')])
                             office_entry[4].append(request.form.get('writein_name'))
                         else:
+                            office_entry[3].append([candidate_values[0], candidate_values[1]])
                             office_entry[4].append(None)
                         log_vote_event('log this final ' + str(office_entry))
                     elif form_name == 'VoteForMany':
@@ -354,14 +353,17 @@ def post_ballot():
                 item_ctr = 0
                 for item in office[3]:
                     if item[0] != 99:
-                        new_vote = Votes(id_candidate=item[0], votes_token=token, votes_writein_name=office[4][item_ctr])
+                        # new_vote = Votes(id_candidate=item[0], votes_token=token, votes_writein_name=office[4][item_ctr])
+                        new_vote = Votes(id_candidate=item[0], votes_token=token,
+                                         votes_writein_name=None)
                         db.session.add(new_vote)
                         log_vote_event(f"Vote submitted for candidate {item[0]} - {item[1]}")
                         item_ctr += 1
-                        pass
+                    pass
         try:
             token_record = Tokenlist.query.filter_by(token=token).first()
             if token_record:
+                print('token_record ' + str(token_record))
                 token_record.vote_submitted_date_time = datetime.now()
                 db.session.commit()
             else:
@@ -424,7 +426,6 @@ def has_writein_candidate(candidate_choices):
     for candidate in candidate_choices:
         print('candidate choices checking for writein ' + candidate[1])
         if 'writein' in candidate[1].lower():
-            print(" is true")
             return candidate[0]
     return None
 
