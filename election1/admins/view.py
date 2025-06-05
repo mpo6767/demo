@@ -17,6 +17,9 @@ def check_session_timeout():
         home = current_app.config['HOME']
         error = 'idle timeout '
         return render_template('session_timeout.html', error=error, home=home)
+    else:
+        logger.info(f'Session check passed for user {current_user.user_so_name} in admin view')
+        return None
 
 
 @admins.route('/user_admin', methods=['GET', 'POST'])
@@ -32,6 +35,7 @@ def user_admin():
         user_pass = request.form['user_pass']
         id_admin_role = request.form['id_admin_role']
         user_email = request.form['user_email']
+        confirm_password = request.form['confirm_password']
 
         user_email_exists = User.query.filter_by(user_email=user_email).first()
         user_so_name_exists = User.query.filter_by(user_so_name=user_so_name).first()
@@ -40,6 +44,8 @@ def user_admin():
             flash("Sign on name already exists", category="error")
         elif user_email_exists:
             flash('Email is already in use.', category='error')
+        elif user_pass != confirm_password:
+            flash('Passwords do not match', category='error')
         else:
             new_user = User(
                 user_firstname=user_firstname,
