@@ -15,5 +15,6 @@ if __name__ == '__main__':
     os.environ['FLASK_ENV'] = 'development'
     os.environ['FLASK_DEBUG'] = '1'
     host = os.getenv('URL_HOST', '127.0.0.1')  # Default to '127.0.0.1'
+
     port = os.getenv('URL_PORT', '5000')
     app.run(host=host, port=int(port), debug=True)

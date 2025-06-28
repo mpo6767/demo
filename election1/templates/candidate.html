@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container text-left">
+  <div class="container">
     <h1> Candidates</h1>
     <br>
     <form method="POST" style="color:white" autocomplete="off">
@@ -37,75 +37,50 @@
             {{ form.choices_office.label() }}
           </div>
           <div class="col-lg-4">
-            <select class="form-select form-select-sm mb-3" aria-label="Large select example" name="choices_office">
-              <option selected>Please select</option>
-              {% for p in form.choices_office.choices %}
-                <option value="{{ p[0] }}">{{ p[1] }}</option>
+            <select class="form-select form-select-sm mb-3" aria-label="Large select example" name="choices_office"
+                    hx-get="/candidate/get-name-fields{{ office_id }}"
+                    hx-target="#name-fields"
+                    hx-trigger="change">
+             <option selected>Please select</option>
+              {% for office in form.choices_office.choices %}
+                <option value="{{ office[0]}}">{{ office[1] }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
       </div>
 
-      <div class="container">
-        <div class="row ">
-          <div class="col-2 ">
-            {{ form.firstname.label() }}
-          </div>
-
-          <div class="col-lg-4">
-            {{ form.firstname(maxlength="45") }}
-          </div>
-          <div class="col-6">
-                    <span id="passwordHelpInline" class="form-text">
-                        <b> First name is required</b>
-                    </span>
-          </div>
-        </div>
-      </div>
-      <br>
-      <div class="container">
-        <div class="row ">
-          <div class="col-2 ">
-            {{ form.lastname.label() }}
-          </div>
-
-          <div class="col-lg-4">
-            {{ form.lastname(maxlength="45") }}
-          </div>
-          <div class="col-6">
-                    <span id="passwordHelpInline" class="form-text">
-                        <b> Last Name is NOT because of binary (Y or N) type ballots</b>
-                    </span>
-          </div>
-        </div>
-      </div>
-      <br>
-      <div class="container">
-        <div class="row ">
-          <div class="col-2 ">
-            {{ form.choices_party.label() }}
-          </div>
-          <div class="col-lg-4">
-            <select class="form-select form-select-sm mb-3" aria-label="Large select example" name="choices_party">
-              <option selected>If candidate associated Please select</option>
-              {% for p in form.choices_party.choices %}
-                <option value="{{ p[0] }}">{{ p[1] }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <br>
-      <div class="d-grid gap-2 d-md-block">
-        {{ form.submit(type="submit",value='Add Candidate', class="btn   btn-primary") }}
-      </div>
-    </form>
-    <br><br>
-    <div class="container" id="candidate_search">
-
+  <div class="container">
+    <div id="name-fields">
+        <!-- Default fields can be loaded here or left empty -->
     </div>
+  </div>
+   <br>
+  <div class="container">
+    <div class="row ">
+      <div class="col-2 ">
+        {{ form.choices_party.label() }}
+      </div>
+      <div class="col-lg-4">
+        <select class="form-select form-select-sm mb-3" aria-label="Large select example" name="choices_party">
+          <option selected>If candidate associated Please select</option>
+          {% for p in form.choices_party.choices %}
+            <option value="{{ p[0] }}">{{ p[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <div class="d-grid gap-2 d-md-block">
+    {{ form.submit(type="submit",value='Add Candidate', class="btn   btn-primary") }}
+  </div>
+  </form>
+  <br><br>
+  <div class="container" id="candidate_search">
+
+  </div>
   </div>
 
 {% endblock %}

@@ -17,7 +17,10 @@ class Config:
     REMEMBER_COOKIE_DURATION = timedelta(seconds=20)
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///election.db'
 
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:T4yl0rSw1ft@localhost/election'
+    # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:T4yl0rSw1ft@localhost/election'
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///election.db')
+    print('SQLALCHEMY_DATABASE_URI:', SQLALCHEMY_DATABASE_URI)
+
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # the following home value is used in the demo to redirect to a specific page

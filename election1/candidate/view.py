@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, Blueprint,
 from flask_login import current_user
 
 from election1.candidate.form import CandidateForm, Candidate_reportForm,  WriteinCandidateForm
-from election1.models import Classgrp, Office, Candidate, WriteinCandidate, Dates, Party
+from election1.models import Classgrp, Office, Candidate, WriteinCandidate, Dates, Party, BallotType
 from election1.extensions import db
 from sqlalchemy.exc import SQLAlchemyError
 from election1.utils import is_user_authenticated, session_check
@@ -161,11 +161,27 @@ def candidate_view():
             form.choices_party.choices = Party.get_all_parties_ordered_by_name()
             return render_template('candidate.html', form=form)
 
+        print("lastname is ", lastname)
+        print(Office.get_ballot_type_name(choices_office))
+
+        if lastname == "":
+            print("lastname is None")
+            if Office.get_ballot_type_name(choices_office) != "Single Name":
+                print("Ballot type is not Single Name")
+                flash("Error: Last name is required unless the ballot type is 'Single Name'.", category="danger")
+                form.choices_office.choices = Office.office_query()
+                form.choices_classgrp.choices = Classgrp.classgrp_query()
+                form.choices_party.choices = Party.get_all_parties_ordered_by_name()
+                return render_template("candidate.html", form=form)
+
         if choices_party == "If candidate associated Please select":
             choices_party = None
 
         if Candidate.check_existing_candidate(firstname, lastname, choices_classgrp) is True:
-            flash('Candidate already exists for this class', category='danger')
+            flash('Candidate already exists for this class or group', category='danger')
+            form.choices_office.choices = Office.office_query()
+            form.choices_classgrp.choices = Classgrp.classgrp_query()
+            form.choices_party.choices = Party.get_all_parties_ordered_by_name()
             return render_template('candidate.html', form=form)
 
         new_candidate = Candidate(firstname=firstname,
@@ -189,6 +205,20 @@ def candidate_view():
         form.choices_office.choices = Office.office_query()
         form.choices_party.choices = Party.get_all_parties_ordered_by_name()
         return render_template('candidate.html', form=form)
+
+
+@candidate.route('/candidate/get-name-fields')
+def get_name_fields():
+    print("get_name_fields called with office_id:")
+    office_id = request.args.get('choices_office')
+    print(office_id)
+    ballot_type_name = Office.get_ballot_type_name(office_id)
+    print("ballot_type_name is ", ballot_type_name)
+    if ballot_type_name in ["Normal", "Rank Choice"]:
+        return render_template('first_last_name.html')
+    elif ballot_type_name in ["Single Name", "Measure"]:
+        return render_template('first_name_only.html')
+    return "", 400
 
 
 @candidate.route('/candidate/search')

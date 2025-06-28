@@ -33,6 +33,17 @@ class BallotType(db.Model):
         """
         return tuple((c.id_ballot_type, c.ballot_type_name) for c in cls.query.order_by(cls.id_ballot_type).all())
 
+    # @classmethod
+    # def get_ballot_type_name_by_id(cls, id_ballot_type):
+    #     """
+    #     Retrieve the ballot_type_name for a given BallotType ID.
+    #     :param id_ballot_type: The ID of the BallotType to retrieve.
+    #     :return: The ballot_type_name if found, otherwise None.
+    #     """
+    #     ballot_type = cls.query.filter_by(id_ballot_type=id_ballot_type).first()
+    #     return ballot_type.ballot_type_name if ballot_type else None
+
+
 class Classgrp(db.Model):
     """
     Represents a class or group in the election system.
@@ -103,6 +114,16 @@ class Office(db.Model):
         """
         return cls.query.filter_by(office_title=office_title).first() is not None
 
+
+    @classmethod
+    def get_ballot_type_name(cls, id_office):
+        """
+        Retrieve the ballot_type_name for a given office ID.
+        :param id_office: The ID of the office.
+        :return: The ballot_type_name if found, otherwise None.
+        """
+        office = db.session.query(cls).filter_by(id_office=id_office).first()
+        return office.ballot_type.ballot_type_name if office and office.ballot_type else None
 
 class Party(db.Model):
     """
