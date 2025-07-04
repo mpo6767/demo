@@ -4,7 +4,7 @@ from flask_wtf.csrf import CSRFError
 from election1 import create_app
 
 app: Flask = create_app()
-
+# test comment
 
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
