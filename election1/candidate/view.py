@@ -140,8 +140,20 @@ def candidate_view():
 
     form = CandidateForm()
     if request.method == 'POST':
-        firstname = request.form['firstname']
-        lastname = request.form['lastname']
+        # firstname = request.form['firstname']
+        if 'firstname' in request.form:
+            firstname = request.form['firstname']
+            # Proceed with your logic
+        else:
+            flash('Firstname is missing in the form submission', category='danger')
+            return redirect(url_for('candidate.candidate_view'))
+
+        if 'lastname' in request.form:
+            lastname = request.form['lastname']
+            # Proceed with your logic
+        else:
+            lastname = ''
+
         choices_classgrp = request.form['choices_classgrp']
         choices_office = request.form['choices_office']
         choices_party = request.form['choices_party']
