@@ -17,8 +17,8 @@ class Config:
     REMEMBER_COOKIE_DURATION = timedelta(seconds=20)
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///election.db'
 
-    # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:T4yl0rSw1ft@localhost/election'
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///election.db')
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:T4yl0rSw1ft@localhost/election'
+    # SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///election.db')
     print('SQLALCHEMY_DATABASE_URI:', SQLALCHEMY_DATABASE_URI)
 
 
@@ -32,7 +32,7 @@ class Config:
 
     # building the home url from the host and port
     HOME = "http://" + URL_HOST + ":" + URL_PORT +"/"
-    print('HOME:', HOME)
+
 
 
 
