@@ -250,14 +250,21 @@ class Candidate(db.Model):
             Classgrp.name.label('group_name'),  # record[0]
             Office.office_title.label('office_title'),  # record[1]
             Office.office_vote_for.label('vote_for'),  # record[2]
-            cls.firstname.label('candidate_firstname'),  # record[3]
-            cls.lastname.label('candidate_lastname'),  # record[4]
-            cls.id_candidate.label('candidate_id'),  # record[5]
+            Candidate.firstname.label('candidate_firstname'),  # record[3]
+            Candidate.lastname.label('candidate_lastname'),  # record[4]
+            Candidate.id_candidate.label('candidate_id'),  # record[5]
             func.count(Votes.id_candidate).label('vote_total')  # record[6]
-        ).join(Votes, Votes.id_candidate == cls.id_candidate) \
-            .join(Office, cls.id_office == Office.id_office) \
-            .join(Classgrp, cls.id_classgrp == Classgrp.id_classgrp) \
-            .group_by(Classgrp.name, Office.office_title, cls.firstname, cls.lastname) \
+        ).join(Votes, Votes.id_candidate == Candidate.id_candidate) \
+            .join(Office, Candidate.id_office == Office.id_office) \
+            .join(Classgrp, Candidate.id_classgrp == Classgrp.id_classgrp) \
+            .group_by(
+            Classgrp.name,
+            Office.office_title,
+            Office.office_vote_for,
+            Candidate.firstname,
+            Candidate.lastname,
+            Candidate.id_candidate
+        ) \
             .order_by(Classgrp.sortkey, Office.sortkey, func.count(Votes.id_candidate).desc()) \
             .all()
 
