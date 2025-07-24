@@ -30,7 +30,7 @@ def dates_view():
 
     form = DatesForm()
 
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate():
         if form.validate_on_submit():
             print("form validated")
 
