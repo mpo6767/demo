@@ -43,6 +43,14 @@ def office_view():
     office_form = OfficeForm()
 
     if request.method == 'POST':
+        if not office_form.validate():  # This validates CSRF by default
+            if 'csrf_token' in office_form.errors:
+                flash('CSRF validation failed', category='danger')
+                # office_form, offices = prepare_office_form()
+                offices = Office.query.order_by(Office.sortkey)
+                office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
+                return render_template('office.html', form=office_form, offices=offices)
+
         office_title = request.form['office_title']
         sortkey = request.form['sortkey']
         office_vote_for = request.form['office_vote_for']
@@ -116,6 +124,13 @@ def deleteoffice(xid):
     form = OfficeForm()
 
     if request.method == 'POST':
+        if not form.validate():  # This validates CSRF by default
+            if 'csrf_token' in form.errors:
+                flash('CSRF validation failed', category='danger')
+                # office_form, offices = prepare_office_form()
+                offices = Office.query.order_by(Office.sortkey)
+                form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
+                return render_template('office.html', form=form, offices=offices)
         try:
             db.session.delete(office_to_delete)
             db.session.commit()
@@ -152,6 +167,13 @@ def updateoffice(xid):
     office_to_update = Office.query.get_or_404(xid)
 
     if request.method == "POST":
+        if not office_form.validate():  # This validates CSRF by default
+            if 'csrf_token' in office_form.errors:
+                flash('CSRF validation failed', category='danger')
+                # office_form, offices = prepare_office_form()
+                offices = Office.query.order_by(Office.sortkey)
+                office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
+                return render_template('office.html', form=office_form, offices=offices)
         office_to_update.office_title = request.form['office_title']
         office_to_update.sortkey = request.form['sortkey']
         office_to_update.office_vote_for = request.form['office_vote_for']

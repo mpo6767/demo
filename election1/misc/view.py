@@ -22,33 +22,15 @@ the excel file is created in the instance folder and is a url to the cast route 
 '''
 @misc.route('/setup_tokens', methods=['POST', 'GET'])
 def setup_tokens():
-    # print("setup_tokens")
-    # Tokenlist.query.delete()
-    # db.session.commit()
-
     form = BuildTokensForm()
-
-
-    # if request.method == 'POST' and form.validate():
-    if request.method == 'GET':
-        print("setup_tokens")
-        # Tokenlist.query.delete()
-        # db.session.commit()
-
-        inspector = inspect(db.engine)
-
-        if not inspector.has_table('tokenlistselectors'):
-            Tokenlistselectors.__table__.create(db.engine)
-        # else:
-        #     Tokenlistselectors.query.delete()
-        #     db.session.commit()
-
-        form.primary_grp.choices = Classgrp.classgrp_query()
-        tokenlistselectors = Tokenlistselectors.query.all()
-
-        return render_template("token_builder.html", form=form, tokenlistselectors=tokenlistselectors)
-    else:
+    if request.method == 'POST':
         print("setup_tokens post")
+
+        if not form.validate():  # This validates CSRF by default
+            if 'csrf_token' in form.errors:
+                flash('CSRF validation failed', category='danger')
+                return redirect(url_for('misc.setup_tokens'))
+
         if request.form.get('primary_grp') == 'Please select':
             flash('Primary group must be selected', category='danger')
             return redirect(url_for('misc.setup_tokens'))
@@ -70,26 +52,37 @@ def setup_tokens():
         else:
             quarternary_grp = request.form.get('quarternary_grp')
 
-
-        if primary_grp != 'Please select':
-            print("primary_grp")
-            new_selector = Tokenlistselectors(
-                primary_grp=primary_grp,
-                secondary_grp=secondary_grp,
-                tertiary_grp=tertiary_grp,
-                quarternary_grp=quarternary_grp
-            )
-            try:
-                db.session.add(new_selector)
-                db.session.commit()
-                flash('Tokenlistselector item added successfully', category='success')
-            except SQLAlchemyError as e:
-                db.session.rollback()
-                flash(f'Error adding Tokenlistselector item: {str(e)}', category='danger')
-        else:
-            flash('Primary group must be selected', category='danger')
+        print(primary_grp)
+        new_selector = Tokenlistselectors(
+            primary_grp=primary_grp,
+            secondary_grp=secondary_grp,
+            tertiary_grp=tertiary_grp,
+            quarternary_grp=quarternary_grp
+        )
+        try:
+            db.session.add(new_selector)
+            db.session.commit()
+            flash('Tokenlistselector item added successfully', category='success')
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash(f'Error adding Tokenlistselector item: {str(e)}', category='danger')
+        # else:
+        #     flash('Primary group must be selected', category='danger')
 
         return redirect(url_for('misc.setup_tokens'))
+    else:
+        print("setup_tokens")
+
+        inspector = inspect(db.engine)
+
+        if not inspector.has_table('tokenlistselectors'):
+            Tokenlistselectors.__table__.create(db.engine)
+
+
+        form.primary_grp.choices = Classgrp.classgrp_query()
+        tokenlistselectors = Tokenlistselectors.query.all()
+
+        return render_template("token_builder.html", form=form, tokenlistselectors=tokenlistselectors)
 
 
 @misc.route('/delete_tokenlistselector/<int:xid>', methods=['GET', 'POST'])
