@@ -38,7 +38,7 @@ def writein_candidate():
 
     form = WriteinCandidateForm()
 
-    if request.method == 'POST':
+    if request.method == 'POST' and form.validate():
         writein_candidate_name = request.form['writein_candidate_name']
         choices_classgrp = request.form['choices_classgrp']
         choices_office = request.form['choices_office']
@@ -139,6 +139,18 @@ def candidate_view():
         return redirect(url_for('mains.homepage'))
 
     form = CandidateForm()
+
+    if request.method == 'POST':
+        # Check if the CSRF token is present and valid
+        # this is a little weird because of the validation use of htmx and the choice fields are not tuples
+        if 'csrf_token' in form.errors:
+            flash('CSRF token validation failed. Please try again.', category='danger')
+            form.choices_classgrp.choices = Classgrp.classgrp_query()
+            form.choices_office.choices = Office.office_query()
+            form.choices_party.choices = Party.get_all_parties_ordered_by_name()
+            return render_template('candidate.html', form=form)
+
+
     if request.method == 'POST':
         # firstname = request.form['firstname']
         if 'firstname' in request.form:
@@ -213,6 +225,7 @@ def candidate_view():
             flash('problem adding candidate ' + str(e), category='danger')
             return redirect('/candidate')
     else:
+
         form.choices_classgrp.choices = Classgrp.classgrp_query()
         form.choices_office.choices = Office.office_query()
         form.choices_party.choices = Party.get_all_parties_ordered_by_name()
