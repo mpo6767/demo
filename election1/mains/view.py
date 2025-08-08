@@ -1,13 +1,10 @@
 from datetime import datetime
-
 from flask import render_template, request, Blueprint, redirect, url_for, flash, session, current_app
 from flask_wtf.csrf import generate_csrf
-from werkzeug.security import check_password_hash
-
+from election1.utils import verify_password
 from election1 import logger, User
 from election1.admins.form import LoginForm
 from flask_login import login_user, logout_user, login_required, current_user
-
 from election1.utils import session_check
 
 mains = Blueprint('mains', __name__)
@@ -21,8 +18,9 @@ def index():
     if current_user.is_authenticated:
         logout_user()
 
-    return redirect(url_for('mains.homepage'))
-
+    # return redirect(url_for('mains.homepage'))
+    logger.info("Entered homepage from /")
+    return render_template('homepage.html')
 
 @mains.route('/home', methods=['GET'])
 @mains.route('/homepage', methods=['GET'])
@@ -53,7 +51,7 @@ def login():
         login_pass = request.form.get("login_pass")
         user = User.get_user_by_so_name(login_so_name)
 
-        if user and check_password_hash(user.user_pass, login_pass):
+        if user and verify_password(user.user_salt, user.user_pass, login_pass):
             login_user(user)
             logger.info(f'User {current_user.user_so_name} has logged on')
 
