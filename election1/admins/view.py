@@ -4,7 +4,8 @@ from election1.extensions import db
 from election1.models import User
 from sqlalchemy.exc import IntegrityError
 import logging
-from werkzeug.security import generate_password_hash
+# from werkzeug.security import generate_password_hash
+from election1.utils import hash_password
 from flask_login import current_user
 from election1.utils import session_check
 
@@ -47,11 +48,14 @@ def user_admin():
         elif user_pass != confirm_password:
             flash('Passwords do not match', category='error')
         else:
+            salt, password_hash = hash_password(user_pass)
             new_user = User(
                 user_firstname=user_firstname,
                 user_lastname=user_lastname,
                 user_so_name=user_so_name,
-                user_pass=generate_password_hash(user_pass, method='scrypt', salt_length=16),
+                # user_pass=generate_password_hash(user_pass, method='scrypt', salt_length=16),
+                user_pass=password_hash,
+                user_salt=salt,
                 id_admin_role=id_admin_role,
                 user_email=user_email
             )
