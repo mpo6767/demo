@@ -32,12 +32,13 @@ Login Page
                  <div class="col-auto">
                      {{ form.login_pass()}}
                 </div>
-
+            </div>
             <br>
             <div class="d-grid gap-2 d-md-block">
                 {{ form.submit(type="submit", value='Login', class="btn btn-primary") }}
             </div>
-        </div>
         </form>
+        <br>
+    <a class="nav-link" href="{{ url_for('ballot.ballot_view') }}">Reset Password</a>
     </div>
 {% endblock %}
