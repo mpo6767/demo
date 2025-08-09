@@ -4,7 +4,6 @@ from datetime import timedelta
 
 class Config:
 
-    SECRET_KEY = 'cvfredsiiisw343434'
     # WTF Form and recaptcha configuration
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = 1800  # 30 minutes
@@ -17,8 +16,8 @@ class Config:
     REMEMBER_COOKIE_DURATION = timedelta(seconds=20)
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///election.db'
 
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:T4yl0rSw1ft@localhost/election'
-    # SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///election.db')
+    # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:T4yl0rSw1ft@localhost/election'
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///election.db')
     print('SQLALCHEMY_DATABASE_URI:', SQLALCHEMY_DATABASE_URI)
 
 
