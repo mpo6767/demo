@@ -277,6 +277,7 @@ class User(db.Model, UserMixin):
     user_lastname = db.Column(db.String(length=45), nullable=False)
     user_so_name = db.Column(db.String(length=30), nullable=False, unique=True)
     user_pass = db.Column(db.String(length=256))
+    user_salt = db.Column(db.String(length=64), nullable=False)
     user_email = db.Column(db.String(length=45), unique=True)
     user_status = db.Column(db.Integer, default=False, nullable=False)
     user_pw_change = db.Column(db.String(length=1))

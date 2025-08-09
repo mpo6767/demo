@@ -3,7 +3,8 @@ from .config import Config  # Import the Config class
 import logging.config
 from flask import Flask, session
 from .models import User, Party, BallotType
-from werkzeug.security import generate_password_hash
+from .utils import hash_password
+# from werkzeug.security import generate_password_hash
 from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy import exc, create_engine
 
@@ -99,10 +100,15 @@ def config_extention(app):
                 user_email = "no@email.com"
                 user_status = 1
                 user_pw_change = 'N'
+
+                salt, password_hash = hash_password(user_pass)
+
                 new_user = models.User(user_firstname=user_firstname,
                                 user_lastname=user_lastname,
                                 user_so_name=user_so_name,
-                                user_pass=generate_password_hash(user_pass, method='scrypt', salt_length=16),
+                                # user_pass=generate_password_hash(user_pass, method='scrypt', salt_length=16),
+                                user_pass=password_hash,
+                                user_salt = salt,
                                 id_admin_role=id_admin_role,
                                 user_email=user_email,
                                 user_status=user_status,
