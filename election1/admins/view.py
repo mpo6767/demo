@@ -85,8 +85,8 @@ def deleteuser(xid):
     """
     Handle user deletion.
     """
+    user_to_delete = User.query.get(xid)
     try:
-        user_to_delete = User.query.get(xid)
         logger.info(f'User {current_user.user_so_name} is deleting user {user_to_delete.user_firstname} {user_to_delete.user_lastname}')
         db.session.delete(user_to_delete)
         db.session.commit()
