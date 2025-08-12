@@ -10,21 +10,21 @@ def admin_roles_query():
 
 
 class UserForm(FlaskForm):
-    user_firstname = StringField(label='firstname', validators=[Length(min=2, max=30), InputRequired()])
-    user_lastname = StringField(label='lastname', validators=[Length(min=2, max=30), InputRequired()])
-    user_so_name = StringField(label='user name', validators=[Length(min=2, max=30), InputRequired()])
+    user_firstname = StringField(label='Firstname', validators=[Length(min=2, max=30), InputRequired()])
+    user_lastname = StringField(label='Lastname', validators=[Length(min=2, max=30), InputRequired()])
+    user_so_name = StringField(label='User Name', validators=[Length(min=2, max=30), InputRequired()])
     user_pass = PasswordField('Password', validators=[InputRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[
         InputRequired()])
     # user_role = StringField(label='role',  validators=[Length(min=1, max=1), InputRequired()])
-    id_admin_role = QuerySelectField(query_factory=admin_roles_query, label='admin role', get_label='admin_role_name')
+    id_admin_role = QuerySelectField(query_factory=admin_roles_query, label='Admin Role', get_label='admin_role_name')
 
-    user_email = EmailField(label='email', validators=[Email()])
-    submit = SubmitField(label='submit')
+    user_email = EmailField(label='Email', validators=[Email()])
+    submit = SubmitField(label='Submit')
 
 
 class LoginForm(FlaskForm):
-    login_so_name = StringField(label='username', validators=[Length(min=2, max=30), InputRequired()])
-    login_pass = PasswordField(label='password', validators=[Length(min=2, max=30), InputRequired()])
+    login_so_name = StringField(label='Username', validators=[Length(min=2, max=30), InputRequired()])
+    login_pass = PasswordField(label='Password', validators=[Length(min=2, max=30), InputRequired()])
     remember = BooleanField(label='remember me')
     submit = SubmitField(label='submit')
