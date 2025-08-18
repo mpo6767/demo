@@ -3,7 +3,7 @@ from flask import render_template, request, Blueprint, redirect, url_for, flash,
 from flask_wtf.csrf import generate_csrf
 from election1.utils import verify_password
 from election1 import logger, User
-from election1.admins.form import LoginForm
+from election1.mains.form import LoginForm
 from flask_login import login_user, logout_user, login_required, current_user
 from election1.utils import session_check
 

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField
-from wtforms.validators import Length, Email, InputRequired, DataRequired, EqualTo
+from wtforms import StringField, PasswordField, SubmitField, EmailField
+from wtforms.validators import Length, Email, InputRequired
 from election1.models import Admin_roles
 from wtforms_alchemy.fields import QuerySelectField
 
@@ -23,8 +23,4 @@ class UserForm(FlaskForm):
     submit = SubmitField(label='Submit')
 
 
-class LoginForm(FlaskForm):
-    login_so_name = StringField(label='Username', validators=[Length(min=2, max=30), InputRequired()])
-    login_pass = PasswordField(label='Password', validators=[Length(min=2, max=30), InputRequired()])
-    remember = BooleanField(label='remember me')
-    submit = SubmitField(label='submit')
+
