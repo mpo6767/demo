@@ -1,8 +1,5 @@
 import base64
-
-from flask import url_for, flash, Blueprint, redirect, request, render_template, current_app, session, send_file
-from pathlib import Path
-import xlsxwriter
+from flask import url_for, flash, Blueprint, redirect, request, render_template, current_app, session
 from sqlalchemy import inspect
 from sqlalchemy.exc import SQLAlchemyError
 from election1.models import Tokenlist, Classgrp, Tokenlistselectors
@@ -99,86 +96,7 @@ def delete_tokenlistselector(xid):
 
     return redirect(url_for('misc.setup_tokens'))
 
-@misc.route('/build_tokens', methods=['GET', 'POST'])
-def build_tokens():
-    print("build_tokens")
 
-    Tokenlist.query.delete()
-    db.session.commit()
-
-    # if there is a file voterTokens
-    p = Path(r"instance/voterTokens.xlsx")
-    p.unlink(missing_ok=True)
-
-    workbook = xlsxwriter.Workbook(r'instance\voterTokens.xlsx')
-    worksheet = workbook.add_worksheet()
-
-    # Get the selected groups from the database
-
-    tokenlistselectors = Tokenlistselectors.get_all_tokenlistselectors_as_dict()
-
-    # selector_list is the list of the selected groups meant if there is more than 1
-    # this list is used to create the excel file and is used asa roundrobin to select the group
-
-    selector_list = []
-
-
-    for selector in tokenlistselectors:
-        selector_values = [
-            selector['primary_grp'],
-            selector['secondary_grp'],
-            selector['tertiary_grp'],
-            selector['quarternary_grp']
-        ]
-        # Filter out None values and join the remaining values with $
-        selector_string = '$'.join(filter(None, selector_values))
-        selector_list.append(selector_string)
-        print("selector string " + selector_string)
-
-    print(tokenlistselectors)
-
-    selector_count = len(tokenlistselectors)
-    print(selector_count)
-
-
-    # Create a new Excel file
-
-    p = Path(r"instance/voterTokens2.xlsx")
-    p.unlink(missing_ok=True)
-
-    workbook = xlsxwriter.Workbook(r'instance\voterTokens.xlsx')
-    worksheet = workbook.add_worksheet()
-
-    row = 0
-    col = 0
-
-    # Set the width of the first column to 120 characters
-    worksheet.set_column(col, col, 120)
-
-    while row < 101:
-        token = get_token()
-        eclass = row % selector_count
-        print('eclass')
-        print(eclass)
-        print('tokenlistselector:', selector_list[eclass])
-
-        row +=1
-
-        try:
-            new_tokenlist = Tokenlist(grp_list=selector_list[eclass],
-                                      token=token,
-                                      vote_submitted_date_time=None)
-            db.session.add(new_tokenlist)
-            db.session.commit()
-            print('write ' + str(row))
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            print("except " + str(e))
-            return redirect("/homepage")
-
-        worksheet.write(row, col, current_app.config['URL_HOST'] + ":" + current_app.config['URL_PORT'] + "/cast/" + selector_list[eclass] + '/' + token)
-    workbook.close()
-    return redirect('/homepage')
 
 @misc.route('/genQR', methods=['GET', 'POST'])
 def genQR():
