@@ -100,10 +100,6 @@ def candidate_report():
         choices_classgrp = request.form['choices_classgrp']
         choices_office = request.form['choices_office']
 
-        # the first if determines if the choice_office is an int 0
-        # I built the candidate_report.html to add a choice of 'All Offices' which is not in the DB
-        # I pass list_of_offices to the html and build the select offices manually fo this html
-
         if int(choices_office) == 0:
             candidates = Candidate.get_candidates_for_all_offices_by_classgrp(choices_classgrp)
             return render_template("candidate_report.html",
@@ -168,7 +164,9 @@ def candidate_view():
 
         choices_classgrp = request.form['choices_classgrp']
         choices_office = request.form['choices_office']
-        choices_party = request.form['choices_party']
+
+        # took out party requirement
+        # choices_party = request.form['choices_party']
 
         # Check if a valid option is selected
         if choices_classgrp == "Please select":
@@ -197,9 +195,9 @@ def candidate_view():
                 form.choices_classgrp.choices = Classgrp.classgrp_query()
                 form.choices_party.choices = Party.get_all_parties_ordered_by_name()
                 return render_template("candidate.html", form=form)
-
-        if choices_party == "If candidate associated Please select":
-            choices_party = None
+        # took out party requirement 11/6/2023
+        # if choices_party == "If candidate associated Please select":
+        #     choices_party = None
 
         if Candidate.check_existing_candidate(firstname, lastname, choices_classgrp) is True:
             flash('Candidate already exists for this class or group', category='danger')
@@ -212,7 +210,7 @@ def candidate_view():
                                   lastname=lastname,
                                   id_classgrp=choices_classgrp,
                                   id_office=choices_office,
-                                  id_party=choices_party)
+                                  id_party='')
 
         try:
             db.session.add(new_candidate)
@@ -225,7 +223,7 @@ def candidate_view():
             flash('problem adding candidate ' + str(e), category='danger')
             return redirect('/candidate')
     else:
-
+        print("GET request for /candidate")
         form.choices_classgrp.choices = Classgrp.classgrp_query()
         form.choices_office.choices = Office.office_query()
         form.choices_party.choices = Party.get_all_parties_ordered_by_name()
