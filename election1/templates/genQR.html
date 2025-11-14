@@ -6,9 +6,18 @@
 {% block content %}
   <body>
   <div class="container">
+<button
+  hx-get="/modal"
+  hx-target="#modals-here"
+  hx-trigger="click"
+  data-bs-toggle="modal"
+  data-bs-target="#modals-here"
+  class="btn btn-primary">help
+</button>
+
+
     <br>
-    <p class=".fs 4, text-info">Gen QR if IP is not localhost and device is NOT phone<br>
-    Gen URL only if device is phone</p>
+    Pick one to generate a link - then vote using vote using the link
 
     <form method="post" style="color:white">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -35,7 +44,6 @@
           <td class="col-Auto"> {{ tokenlistselector.primary_grp }}</td>
           <td class="col-Auto"> {{ tokenlistselector.secondary_grp }}</td>
           <td class="col-Auto"> {{ tokenlistselector.tertiary_grp }}</td>
-
           <td>
             <a
               class="btn btn-link"
@@ -43,7 +51,7 @@
               hx-target="#qrcode"
               hx-trigger="click"
             >
-              Click to generate QR
+              Click to generate link
             </a>
           </td>
 
@@ -51,16 +59,23 @@
       {% endfor %}
 
     </table>
-    <br><br>
 
-    <div class="container" id="qrcode">
-
+  <div id="modals-here"
+    class="modal modal-blur fade"
+    style="display: none"
+    aria-hidden="false"
+    tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content"></div>
     </div>
+</div>
 
   </div>
 
-
+  <div class="container" id="qrcode">
   </div>
+
+
 
   </body>
 

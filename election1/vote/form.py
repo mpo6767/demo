@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms_alchemy import QuerySelectField
 
 from election1.models import Classgrp, Office, Candidate
-from wtforms import RadioField, SubmitField, BooleanField
+from wtforms import RadioField, SubmitField, BooleanField, StringField
 from election1.extensions import db
 from wtforms.validators import InputRequired
 
@@ -11,8 +11,16 @@ def classgrp_query():
     return Classgrp.query.order_by(Classgrp.sortkey)
 
 class VoteForOne(FlaskForm):
-    candidate = RadioField(label='candidate', choices=[], validators=[InputRequired()])
+    candidate = RadioField(label='candidate', choices=[])
+    measure = StringField(label='measure', render_kw={'readonly': True})
     submit = SubmitField(label='submit')
+
+    def __init__(self, office=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if office is not None:
+            val = getattr(office, 'office_measure', None)
+            if val:
+                self.measure.data = val
 
 
 class VoteForMany(FlaskForm):

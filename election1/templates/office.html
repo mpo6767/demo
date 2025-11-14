@@ -6,7 +6,7 @@
 <body>
 {% block content %}
   <div class="container">
-    <h1> Offices,Post or Measure </h1>
+    <h1> Office,Post,Measure or Proposition</h1>
     <br>
     <form method="post" style="color:white" autocomplete="off">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -19,9 +19,7 @@
             {{ form.office_title() }}
           </div>
           <div class="col-6">
-                    <span id="passwordHelpInline" class="form-text">
-                        <b> Enter the title of the office or post. </b>
-                    </span>
+            <b> Enter the title of the office or measure </b>
           </div>
         </div>
       </div>
@@ -34,8 +32,10 @@
           </div>
           <div class="col-lg-4">
 
-            <select class="form-select form-select-sm" aria-label=".form-select-sm example"
-                    name="ballot_type">
+            <select class="form-select form-select-sm" aria-label=".form-select-sm example" name="ballot_type"
+                    hx-get="/office/get-ballot-type{{ ballot_type_id }}"
+                    hx-target="#measure"
+                    hx-trigger="change">
               <option selected>Please select type</option>
               {% for p in form.ballot_type.choices %}
                 <option value="{{ p[0] }}">{{ p[1] }}</option>
@@ -44,9 +44,7 @@
           </div>
 
           <div class="col-6">
-                    <span id="passwordHelpInline" class="form-text">
-                        <b> Select the Ballot Type </b>
-                    </span>
+            <b> Select the Ballot Type </b>
           </div>
         </div>
       </div>
@@ -54,41 +52,15 @@
       <br>
 
       <div class="container">
-        <div class="row">
-          <div class="col-2">
-            {{ form.office_vote_for.label() }}
-          </div>
-          <div class="col-lg-4">
-            {{ form.office_vote_for() }}
-          </div>
-          <div class="col-6">
-                    <span id="passwordHelpInline" class="form-text">
-                        <b> Max Candidates to Vote For. </b>
-                    </span>
-          </div>
+        <div id="measure">
+          <!-- Default fields can be loaded here or left empty -->
         </div>
       </div>
 
-      <br>
-      <div class="container">
-        <div class="row">
-          <div class="col-2">
-            {{ form.sortkey.label() }}
-          </div>
-          <div class="col-lg-4">
-            {{ form.sortkey() }}
-          </div>
-          <div class="col-6">
-                    <span id="passwordHelpInline" class="form-text">
-                        <b>For sort order in dropdowns.  Use up down arrows in entry field or keyboard.  Or, enter number.</b>
-                    </span>
-          </div>
-        </div>
-      </div>
 
       <br>
       <div class="col-2 d-grid gap-2 d-sm-block">
-        {{ form.submit(type="submit",value='Add Office', class="btn   btn-primary") }}
+        {{ form.submit(type="submit",value='Add Office/Measure', class="btn   btn-primary") }}
       </div>
       <br><br>
     </form>
@@ -100,7 +72,7 @@
           <th class="col-3"> Sort Key</th>
           <th class="col-3"> Vote For</th>
           <th class="col-2"> Office</th>
-           <th class="col-2"> Type</th>
+          <th class="col-2"> Type</th>
           <th class="col-2"> Delete</th>
           <th class="col-2"> Edit</th>
         </tr>
@@ -113,7 +85,7 @@
             <td>{{ office.sortkey }}</td>
             <td>{{ office.office_vote_for }}</td>
             <td>{{ office.office_title }}</td>
-            <td>{{ office.ballot_type.ballot_type_name}}</td>
+            <td>{{ office.ballot_type.ballot_type_name }}</td>
             <td><a href="{{ url_for('office.deleteoffice',xid=office.id_office) }}">Delete</a></td>
             <td><a href="{{ url_for('office.updateoffice',xid=office.id_office) }}">Edit</a></td>
           </tr>

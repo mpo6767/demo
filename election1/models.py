@@ -33,15 +33,15 @@ class BallotType(db.Model):
         """
         return tuple((c.id_ballot_type, c.ballot_type_name) for c in cls.query.order_by(cls.id_ballot_type).all())
 
-    # @classmethod
-    # def get_ballot_type_name_by_id(cls, id_ballot_type):
-    #     """
-    #     Retrieve the ballot_type_name for a given BallotType ID.
-    #     :param id_ballot_type: The ID of the BallotType to retrieve.
-    #     :return: The ballot_type_name if found, otherwise None.
-    #     """
-    #     ballot_type = cls.query.filter_by(id_ballot_type=id_ballot_type).first()
-    #     return ballot_type.ballot_type_name if ballot_type else None
+    @classmethod
+    def get_ballot_type_name_by_id(cls, id_ballot_type):
+        """
+        Retrieve the ballot_type_name for a given BallotType ID.
+        :param id_ballot_type: The ID of the BallotType to retrieve.
+        :return: The ballot_type_name if found, otherwise None.
+        """
+        ballot_type = cls.query.filter_by(id_ballot_type=id_ballot_type).first()
+        return ballot_type.ballot_type_name if ballot_type else None
 
 
 class Classgrp(db.Model):
@@ -59,15 +59,15 @@ class Classgrp(db.Model):
     def classgrp_query(cls):
         return [(c.id_classgrp, c.name) for c in cls.query.order_by(cls.sortkey).all()]
 
-class BallotMeasure(db.Model):
-    """
-    Represents a ballot measure in the election.
-    """
-    id_ballot_measure = db.Column(db.Integer, primary_key=True)
-    ballot_measure_title = db.Column(db.String(length=45), nullable=False, unique=True)
-    ballot_measure_description = db.Column(db.String(length=255), nullable=False)
-    creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
-    offices = db.relationship('Office', backref='ballot_measure', cascade="all, delete-orphan")
+# class BallotMeasure(db.Model):
+#     """
+#     Represents a ballot measure in the election.
+#     """
+#     id_ballot_measure = db.Column(db.Integer, primary_key=True)
+#     ballot_measure_title = db.Column(db.String(length=45), nullable=False, unique=True)
+#     ballot_measure_description = db.Column(db.String(length=255), nullable=False)
+#     creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
+#     offices = db.relationship('Office', backref='ballot_measure', cascade="all, delete-orphan")
 
 
 class Office(db.Model):
@@ -78,9 +78,9 @@ class Office(db.Model):
     office_title = db.Column(db.String(length=45), nullable=False, unique=True)
     office_vote_for = db.Column(db.Integer, default=1, nullable=False)
     sortkey = db.Column(db.Integer, nullable=False, unique=True)
+    office_measure = db.Column(db.String(length=255), nullable=True)
     creation_datetime = db.Column(db.DateTime, default=datetime.now, nullable=False)
     id_ballot_type = db.Column(db.Integer, db.ForeignKey('ballot_type.id_ballot_type'), nullable=False)
-    id_ballot_measure = db.Column(db.Integer, db.ForeignKey('ballot_measure.id_ballot_measure'), nullable=True)
     candidates = db.relationship('Candidate', cascade="all, delete-orphan", backref='office')
 
     @classmethod
