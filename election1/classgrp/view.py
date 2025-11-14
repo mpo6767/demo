@@ -3,11 +3,12 @@ from flask import (render_template, url_for, flash,
 from election1.classgrp.form import ClassgrpForm
 from election1.models import Classgrp, Candidate, Dates
 from election1.extensions import db
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 import logging
 from flask_login import current_user
 from election1.utils import session_check
 from datetime import datetime
+import re
 
 
 classgrp = Blueprint('classgrp', __name__)
@@ -131,15 +132,40 @@ def updateclass(xid):
             logger.info('user ' + str(current_user.user_so_name) + " has edit classgrp " + str(classgrp_to_update.name))
             # return render_template('classgrp.html', form=classgrp_form, classgrps=classgrps)
             return redirect('/classgrp')
-        except SQLAlchemyError as e:
-
+        except IntegrityError as e:
             db.session.rollback()
-            flash('There was a problem updating record record ' + str(e), category='danger')
-            classgrp_form.name.data = ''
-            classgrp_form.sortkey.data = ''
 
-            classgrps = Classgrp.query.order_by(Classgrp.sortkey)
-            return render_template('classgrp.html', form=classgrp_form, classgrps=classgrps)
+            # Get driver-level original error message when available
+            orig = getattr(e, 'orig', None)
+            orig_msg = str(orig) if orig is not None else str(e)
+            orig_msg_lower = orig_msg.lower()
+
+            # Try SQLite: "UNIQUE constraint failed: table.column"
+            sqlite_m = re.search(r'unique constraint failed:\s*([\w\.]+)', orig_msg_lower)
+
+            # Try Postgres: 'duplicate key value violates unique constraint "constraint_name"'
+            pg_m = re.search(r'duplicate key value violates unique constraint\s*"([^"]+)"', orig_msg_lower)
+
+            # Try generic Postgres/other: 'Key (col1, col2)=(...) already exists.'
+            key_m = re.search(r'key \(([^)]+)\)=', orig_msg_lower)
+
+            conflict = None
+            if sqlite_m:
+                conflict = sqlite_m.group(1)  # e.g. table.column
+            elif pg_m:
+                conflict = pg_m.group(1)  # constraint name; may need mapping to column
+            elif key_m:
+                conflict = key_m.group(1)  # column list
+
+            if conflict:
+                user_msg = f'A record with the same {conflict} already exists. Please choose a different value.'
+            else:
+                user_msg = 'A record with that unique value already exists. Please choose a different value.'
+
+            logger.warning('IntegrityError adding/updating classgrp: %s', orig_msg, exc_info=True)
+            flash(user_msg, category='danger')
+            return redirect('/classgrp')
+
     else:
         print()
         classgrp_form.name.data = ''

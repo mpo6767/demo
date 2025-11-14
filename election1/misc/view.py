@@ -108,7 +108,6 @@ def genQR():
 
 @misc.route('/single_token/<int:xid>', methods=['GET','POST'])
 def single_token(xid):
-    print("single_tokens")
 
     token = get_token()
 
@@ -140,7 +139,7 @@ def single_token(xid):
         return redirect("/homepage")
 
     qr_data = "http://" + current_app.config['URL_HOST'] + ":" + current_app.config['URL_PORT'] + "/cast/" + selector_string + '/' + token
-    qr_data_URL = "http://" + qr_data
+    # qr_data_URL = "http://" + qr_data
 
     qr = qrcode.QRCode(
         version=1,
@@ -160,10 +159,30 @@ def single_token(xid):
     session.clear()
 
     # Return the QR code and URL as HTML
-    qr_code_img = f'<img src="data:image/png;base64,{base64.b64encode(img_io.getvalue()).decode()}" alt="QR Code">'
-    qr_code_url = f'<br><br><p><a href="{qr_data}" target="_blank">{qr_data}</a></p>'
-    return qr_code_img + qr_code_url
+    # qr_code_img = f'<img src="data:image/png;base64,{base64.b64encode(img_io.getvalue()).decode()}" alt="QR Code">'
+    qr_code_url = f'<p><a href="{qr_data}" target="_blank">{qr_data}</a></p>'
+    return qr_code_url
     # return send_file(img_io, mimetype='image/png', as_attachment=False, download_name='qrcode.png')
+
+@misc.route('/modal', methods=['GET'])
+def modal():
+    help_content = (
+        '<div class="modal-dialog modal-dialog-centered">'
+        '<div class="modal-content">'
+        '<div class="modal-header">'
+        '<h5 class="modal-title">Modal Help Sample Vote</h5>'
+        '</div>'
+        '<div class="modal-body">'
+        '<img src="static/modals/vote_c_1.jpg" alt="Help Image" style="max-width:100%;">'
+        '</div>'
+        '<div class="modal-footer">'
+        '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>'
+        '</div>'
+        '</div>'
+        '</div>'
+    )
+    return help_content
+
 
 
 

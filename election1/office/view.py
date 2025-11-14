@@ -55,13 +55,15 @@ def office_view():
         sortkey = request.form['sortkey']
         office_vote_for = request.form['office_vote_for']
         id_ballot_type = (request.form['ballot_type'])
+        office_measure = request.form.get('office_measure', None)
 
 
 
         new_office = Office(office_title=office_title,
                             sortkey=sortkey,
                             office_vote_for=office_vote_for,
-                            id_ballot_type=id_ballot_type)
+                            id_ballot_type=id_ballot_type,
+                            office_measure=office_measure)
 
         try:
             db.session.add(new_office)
@@ -174,10 +176,23 @@ def updateoffice(xid):
                 offices = Office.query.order_by(Office.sortkey)
                 office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
                 return render_template('office.html', form=office_form, offices=offices)
+
+
+
+        # office_title = request.form['office_title']
+        # sortkey = request.form['sortkey']
+        # office_vote_for = request.form['office_vote_for']
+        # id_ballot_type = (request.form['ballot_type'])
+        # office_measure = request.form.get('office_measure', None)
+
         office_to_update.office_title = request.form['office_title']
         office_to_update.sortkey = request.form['sortkey']
         office_to_update.office_vote_for = request.form['office_vote_for']
-        office_to_update.id_ballot_type = request.form['ballot_type']
+        # office_to_update.id_ballot_type = request.form['ballot_type']
+        office_to_update.office_measure = request.form.get('office_measure', None)
+
+        # print("request.form['office_measure'] is ", request.form['office_measure'])
+        # # office_to_update.office_measure = request.form['office_measure']
 
         try:
             db.session.commit()
@@ -205,5 +220,27 @@ def updateoffice(xid):
 
     else:
         office_form.ballot_type.choices = BallotType.get_all_ballot_types_sorted_by_name()
+        print("xxx office_to_update.id_ballot_type is ", office_to_update.id_ballot_type)
+
+        office_form.office_measure.data = office_to_update.office_measure
+        print(office_to_update.office_measure)
+
         return render_template('update_office.html', form=office_form,
-                               office_to_update=office_to_update,)
+                               office_to_update=office_to_update, )
+
+
+@office.route('/office/get-ballot-type')
+def get_ballot_type():
+    form = OfficeForm()
+    print("called with ballot type")
+    type_id = request.args.get('ballot_type', type=int)
+    print("type_id is ", type_id)
+    ballot_type_name = BallotType.get_ballot_type_name_by_id(type_id)
+    print("ballot_type_name is ", ballot_type_name)
+    if ballot_type_name == "Measure":
+        print("returning Measure")
+        return render_template('office_w_measure.html', form=form)
+    else:
+        print("returning no Measure")
+        return render_template('office_wo_measure.html', form = form)
+

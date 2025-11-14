@@ -188,9 +188,9 @@ def candidate_view():
 
         if lastname == "":
             print("lastname is None")
-            if Office.get_ballot_type_name(choices_office) != "Single Name":
-                print("Ballot type is not Single Name")
-                flash("Error: Last name is required unless the ballot type is 'Single Name'.", category="danger")
+            if Office.get_ballot_type_name(choices_office) not in ["Single Name", "Measure"]:
+                print("Ballot type is not Single Name or Measure")
+                flash("Error: Last name is required unless the ballot type is 'Single Name or Measure'.", category="danger")
                 form.choices_office.choices = Office.office_query()
                 form.choices_classgrp.choices = Classgrp.classgrp_query()
                 form.choices_party.choices = Party.get_all_parties_ordered_by_name()

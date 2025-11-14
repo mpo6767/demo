@@ -36,7 +36,8 @@
           </div>
           <div class="col-lg-4">
 
-            <select class="form-select form-select-sm" aria-label=".form-select-sm example" name="ballot_type">
+            <select class="form-select form-select-sm bg-secondary" aria-label=".form-select-sm example" name="ballot_type"
+                    disabled>
               {% for p in form.ballot_type.choices %}
                 <option value="{{ p[0] }}" {% if p[0] == office_to_update.id_ballot_type %}selected{% endif %}>
                   {{ p[1] }}
@@ -46,13 +47,23 @@
           </div>
 
           <div class="col-6">
-                    <span id="passwordHelpInline" class="form-text">
-                        <b> Select the Ballot Type </b>
-                    </span>
+            <b> NO change to Ballot Type-USE Delete instead </b>
           </div>
         </div>
       </div>
-
+      <br>
+      {% if office_to_update.office_measure %}
+        <div class="container">
+          <div class="row">
+            <div class="col-2">
+              {{ form.office_measure.label() }}
+            </div>
+            <div class="col-lg-4">
+              {{ form.office_measure(rows=3, maxlength=256, class_="form-control") }}
+            </div>
+          </div>
+        </div>
+      {% endif %}
       <br>
 
       <div class="container">

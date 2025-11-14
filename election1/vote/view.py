@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Blueprint, request, render_template, redirect, session, current_app, url_for
+from flask import Blueprint, request, render_template, redirect, session, current_app, url_for, g
 from election1.extensions import db
 from election1.models import Classgrp, Office, Candidate, Tokenlist, Votes
 from election1.vote.form import VoteForOne, VoteForMany, ReviewVotes
@@ -31,7 +31,7 @@ def cast(grp_list, token):
 
     # Check if there is no session then check the validity of the token
     # when a voter comes to the cast page it votes in a single session
-    global next_office
+    # global next_office
     if not session:
         log_vote_event('new session' 
                        f' for grp_list: {grp_list}, and token: {token}, ')
@@ -145,29 +145,36 @@ def cast(grp_list, token):
         print('office_dict ' + str(session.get('office_dict')))
         session['office_dict_length'] = len(session.get('office_dict'))
         session['current_office'] = 0
-
+        #
         # Get the office_dict from the session
         # office_dict = session.get('office_dict', None)
 
-        next_office = get_next_office_for_group(session.get('office_dict'), session.get('group'))
-        if next_office is None:
+        g.next_office = get_next_office_for_group(session.get('office_dict'), session.get('group'))
+        if g.next_office is None:
             if session['grp_pointer'] + 1 < session['grp_list_length']:
                 session['grp_pointer'] += 1
                 session['group'] = grp_list.split('$')[session.get('grp_pointer')]
-                next_office = get_next_office_for_group(session.get('office_dict'), session.get('group'))
+                g.next_office = get_next_office_for_group(session.get('office_dict'), session.get('group'))
             else:
                 vote_form = ReviewVotes()
                 return render_template('cast3.html', form=vote_form, grp=grp,
                                        office_dict=session.get('office_dict'))
 
-        session['office'] = next_office[0]
-        if next_office[2] == 1:  # vote for one
+        session['office'] = g.next_office[0]
+        if g.next_office[2] == 1:  # vote for one
 
             votes_form = VoteForOne()
-            candidate_choices = office_grp_query(grp, next_office[0])
+            candidate_choices = office_grp_query(grp, g.next_office[0])
             print('candidate_choices a ' + str(candidate_choices))
             writein_candidate_id = has_writein_candidate(candidate_choices)
             print('writein_candidate_id ' + str(writein_candidate_id))
+
+
+            ballot_measure = has_measure(g.next_office[0])
+            print('ballot_measure ' + str(ballot_measure))
+            if ballot_measure:
+                votes_form.measure.data = ballot_measure
+
             html_writein = 0
             if writein_candidate_id is not None:
                 html_writein = writein_candidate_id
@@ -178,14 +185,15 @@ def cast(grp_list, token):
                 VoteForOne.candidate.choices = candidate_choices
                 print ('VoteForOne.candidate.choices ' + str(VoteForOne.candidate.choices))
 
-            return render_template('cast1.html', form=votes_form, office=next_office[0],
-                                   candidates=VoteForOne.candidate.choices, grp=grp, html_writein=html_writein)
+            return render_template('cast1.html', form=votes_form, office=g.next_office[0],
+                                   candidates=VoteForOne.candidate.choices, grp=grp, html_writein=html_writein,
+                                   measure=ballot_measure)
 
-        if next_office[2] > 1:  # vote for one or
+        if g.next_office[2] > 1:  # vote for one or
             votes_form = VoteForMany()
-            candidate_choices = office_grp_query(grp, next_office[0])
-            return render_template('cast2.html', form=votes_form, office=next_office[0],
-                                   candidates=candidate_choices, grp=grp, max_votes=next_office[2])
+            candidate_choices = office_grp_query(grp, g.next_office[0])
+            return render_template('cast2.html', form=votes_form, office=g.next_office[0],
+                                   candidates=candidate_choices, grp=grp, max_votes=g.next_office[2])
 
 # this is the end of session
 
@@ -206,6 +214,8 @@ def cast(grp_list, token):
                         # Add the selected_candidate_id to the list of candidates voted for
                         log_vote_event('log this non final ' + str(selected_candidate_id))
                         candidate_values = str(selected_candidate_id).split('$')
+                        
+                        # lets make sure that there is a value in candidate_values[1]
 
                         if candidate_values[1] == "Write In":
                             office_entry[3].append([candidate_values[0],  request.form.get('writein_name')])
@@ -226,9 +236,9 @@ def cast(grp_list, token):
             # Update the session with the modified office_dict
             # session['office_dict'] = office_dict
             log_vote_event('201 ' + group)
-            next_office = get_next_office_for_group(session.get('office_dict'), group)
-            log_vote_event('203 next_office ' + str(next_office))
-            if next_office is None:
+            g.next_office = get_next_office_for_group(session.get('office_dict'), group)
+            log_vote_event('203 next_office ' + str(g.next_office))
+            if g.next_office is None:
                 if session['grp_pointer'] + 1 < session['grp_list_length']:
                     session['grp_pointer'] += 1
                     log_vote_event('session grp_pointer gggg' + str(session['grp_pointer']))
@@ -241,23 +251,31 @@ def cast(grp_list, token):
                     session['group'] = session['grp_list'].split('$')[session['grp_pointer']]
                     log_vote_event('215 ' + str(session.get('group')))
 
-                    next_office = get_next_office_for_group(session.get('office_dict'), session.get('group'))
+                    g.next_office = get_next_office_for_group(session.get('office_dict'), session.get('group'))
                 else:
                     log_vote_event('no more offices a')
                     vote_form = ReviewVotes()
                     print('office_dict ' + str(session.get('office_dict')))
                     return render_template('cast3.html', form=vote_form, group=session.get('group'),
                                            office_dict=session.get('office_dict'))
-            log_vote_event('next_office ' + str(next_office))
-            if next_office is not None:
-                session['office'] = next_office[0]
-                if next_office[2] == 1:  # vote for one
+            log_vote_event('next_office ' + str(g.next_office))
+            if g.next_office is not None:
+                session['office'] = g.next_office[0]
+                if g.next_office[2] == 1:  # vote for one
                     votes_form = VoteForOne()
                     grp = session.get('group', None)
-                    candidate_choices = office_grp_query(grp, next_office[0])
+                    candidate_choices = office_grp_query(grp, g.next_office[0])
+                    # ballot_mesure =
 
                     print('candidate_choices p ' + str(candidate_choices))
                     writein_candidate_id = has_writein_candidate(candidate_choices)
+
+
+                    ballot_measure = has_measure(g.next_office[0])
+                    if ballot_measure:
+                        votes_form.measure.data = ballot_measure
+                        print('ballot_measure p ' + str(ballot_measure))
+
                     html_writein = 0
                     if writein_candidate_id is not None:
                         html_writein = writein_candidate_id
@@ -267,19 +285,20 @@ def cast(grp_list, token):
                         # html_writein = 0
                         VoteForOne.candidate.choices = candidate_choices
 
-                    # session['office'] = next_office[0]
+                    # session['office'] = g.next_office[0]
                     print('VoteForOne.candidate.choices x ' + str(VoteForOne.candidate.choices))
-                    return render_template('cast1.html', form=votes_form, office=next_office[0],
-                                           candidates=VoteForOne.candidate.choices, grp=grp, html_writein=html_writein)
+                    return render_template('cast1.html', form=votes_form, office=g.next_office[0],
+                                           candidates=VoteForOne.candidate.choices, grp=grp, html_writein=html_writein,
+                                           measure=ballot_measure)
 
-            if next_office is not None:
-                if next_office[2] > 1:  # vote for one or more
+            if g.next_office is not None:
+                if g.next_office[2] > 1:  # vote for one or more
                     votes_form = VoteForMany()
                     grp = session.get('group', None)
-                    candidate_choices = office_grp_query(grp, next_office[0])
+                    candidate_choices = office_grp_query(grp, g.next_office[0])
                     VoteForOne.candidate.choices = candidate_choices
-                    return render_template('cast2.html', form=votes_form, office=next_office[0],
-                                           candidates=candidate_choices, grp=grp, max_votes=next_office[2])
+                    return render_template('cast2.html', form=votes_form, office=g.next_office[0],
+                                           candidates=candidate_choices, grp=grp, max_votes=g.next_office[2])
     vote_form = ReviewVotes()
     log_vote_event('no more offices b')
     print('office_dict ' + str(session.get('office_dict')))
@@ -353,9 +372,9 @@ def post_ballot():
                 item_ctr = 0
                 for item in office[3]:
                     if item[0] != 99:
-                        # new_vote = Votes(id_candidate=item[0], votes_token=token, votes_writein_name=office[4][item_ctr])
-                        new_vote = Votes(id_candidate=item[0], votes_token=token,
-                                         votes_writein_name=None)
+                        new_vote = Votes(id_candidate=item[0], votes_token=token, votes_writein_name=office[4][item_ctr])
+                        # new_vote = Votes(id_candidate=item[0], votes_token=token,
+                        #                  votes_writein_name=None)
                         db.session.add(new_vote)
                         log_vote_event(f"Vote submitted for candidate {item[0]} - {item[1]}")
                         item_ctr += 1
@@ -432,6 +451,19 @@ def has_writein_candidate(candidate_choices):
 def remove_writein_candidate(candidate_choices, writein_candidate_id):
     print('writein_candidate_id ' + str(writein_candidate_id))
     return [candidate for candidate in candidate_choices if candidate[0] != writein_candidate_id]
+
+def has_measure(office):
+    print('office measure checking for writein ' + office[1])
+    office_rec = Office.query.filter_by(office_title=g.next_office[0]).first()
+    if office_rec and getattr(office_rec, 'office_measure', None):
+        ballot_measure = office_rec.office_measure
+        print(ballot_measure)
+        return ballot_measure
+    else:
+        print('no measure found')
+        return None
+        # populate read-only form field added to VoteForOne
+        # votes_form.measure.data = ballot_measure
 
 
 

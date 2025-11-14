@@ -32,7 +32,15 @@ def dates_view():
 
     if request.method == 'POST' and form.validate():
         if form.validate_on_submit():
-            print("form validated")
+
+            d_now = datetime.now().strftime('%Y-%m-%dT%H:%M')
+
+            if request.form.get('start_date_time') < d_now:
+                flash('Start date and time must be in the future', 'danger')
+                return render_template('dates.html', form=form)
+            if request.form.get('end_date_time') <= request.form.get('start_date_time'):
+                flash('End date and time must be after start date and time', 'danger')
+                return render_template('dates.html', form=form)
 
             datetime_str = request.form.get('start_date_time').replace("T", " ")
             datetime_etr = request.form.get('end_date_time').replace("T", " ")
