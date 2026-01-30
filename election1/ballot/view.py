@@ -1,3 +1,6 @@
+# Copyright © 2026 Michael O'Connor
+# All rights reserved.
+
 from flask import (render_template, url_for, flash, redirect, request, Blueprint, current_app)
 from election1.ballot.form import (BallotTypeForm)
 from election1.models import Dates, BallotType

@@ -1,3 +1,6 @@
+# Copyright © 2026 Michael O'Connor
+# All rights reserved.
+
 import base64
 from flask import url_for, flash, Blueprint, redirect, request, render_template, current_app, session
 from sqlalchemy import inspect

@@ -1,3 +1,6 @@
+# Copyright © 2026 Michael O'Connor
+# All rights reserved.
+
 from datetime import datetime
 from flask import render_template, request, Blueprint, redirect, url_for, flash, session, current_app
 from flask_wtf.csrf import generate_csrf

@@ -1,3 +1,6 @@
+# Copyright © 2026 Michael O'Connor
+# All rights reserved.
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField, TextAreaField
 from wtforms.validators import Length, DataRequired

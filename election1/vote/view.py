@@ -1,3 +1,6 @@
+# Copyright © 2026 Michael O'Connor
+# All rights reserved.
+
 from datetime import datetime
 from flask import Blueprint, request, render_template, redirect, session, current_app, url_for, g
 from election1.extensions import db

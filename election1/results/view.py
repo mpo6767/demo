@@ -1,3 +1,6 @@
+# Copyright © 2026 Michael O'Connor
+# All rights reserved.
+
 from datetime import datetime
 from flask import Blueprint, request, render_template
 from election1.models import Classgrp, Office, Candidate, Tokenlist, Votes, Dates

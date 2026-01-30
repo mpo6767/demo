@@ -1,3 +1,6 @@
+# Copyright © 2026 Michael O'Connor
+# All rights reserved.
+
 from flask import Blueprint, request, redirect, flash, render_template, url_for, current_app
 from election1.admins.form import UserForm
 from election1.extensions import db

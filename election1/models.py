@@ -1,12 +1,12 @@
-from sqlalchemy.orm import joinedload
+# Copyright © 2026 Michael O'Connor
+# All rights reserved.
+
 
 from election1.extensions import db
 from flask_login import UserMixin
 from datetime import datetime
 from election1.utils import unique_security_token
 from sqlalchemy import func
-from sqlalchemy.orm import joinedload
-from sqlalchemy.exc import IntegrityError
 class BallotType(db.Model):
     """
     Represents the type of ballot used in the election.
