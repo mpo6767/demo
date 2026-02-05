@@ -19,6 +19,13 @@ class Config:
     REMEMBER_COOKIE_DURATION = timedelta(seconds=20)
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///election.db'
 
+    EMAIL_SERVER = os.getenv('EMAIL_SERVER', 'smtp.office365.com')
+    EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+    EMAIL_USE_TLS = True
+
+    EMAIL_ACCOUNT = os.getenv('EMAIL_ACCOUNT', 'support@cpo2llc.com')
+    EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD', 'Z!935105014606om')
+
     # SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:T4yl0rSw1ft@localhost/election'
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI', 'sqlite:///election.db')
     print('SQLALCHEMY_DATABASE_URI:', SQLALCHEMY_DATABASE_URI)
