@@ -72,10 +72,10 @@
         <div class="col-auto">
           {{ form.user_email(autocomplete="off") }}
         </div>
-        <div class="col-sm-2">
-                    <span id="passwordHelpInline" class="form-text">
+        <div class="col-sm-6">
+                    <div class="col-6">
                        Put in a fake unique email address for this user because this demo is not connected to an email server.
-                    </span>
+                    </div>
         </div>
       </div>
       <br>
@@ -83,7 +83,7 @@
         {{ form.submit(type="submit",value='Add Admin', class="btn btn-primary") }}
       </div>
     </form>
-    <br><br>
+
     <div class="container">
       <table class="table-dark">
         <thead>
